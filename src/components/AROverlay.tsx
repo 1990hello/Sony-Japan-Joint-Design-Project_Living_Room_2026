@@ -181,28 +181,39 @@ export const AROverlay: React.FC<AROverlayProps> = ({
           left: `${screenX}%`,
           top: `${screenY}%`,
           transform: 'translate(-50%, -50%)',
+          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.35))',
         }}
       >
+        {/* Identified Target Badge */}
+        {tracking.isTargetHit && tracking.currentTarget !== 'none' && (
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-mono text-cyan-200 bg-slate-950/90 px-2 py-0.5 rounded-full border border-cyan-400/60 shadow-md flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <span>TARGET: {tracking.currentTarget.toUpperCase().replace('_', ' ')}</span>
+          </div>
+        )}
+
         <div
-          className={`rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
+          className={`rounded-full border-2 transition-all duration-150 flex items-center justify-center ${
             tracking.isPinching
-              ? 'w-6 h-6 border-amber-300 bg-amber-300/30 scale-90 shadow-[0_0_12px_#fbbf24]'
-              : tracking.isInsideOrb
-              ? 'w-10 h-10 border-cyan-300 bg-cyan-300/15 scale-110 shadow-[0_0_10px_#38bdf8]'
-              : tracking.isNearWindmill && isWindmillState(state)
-              ? 'w-10 h-10 border-amber-300 bg-amber-300/15 scale-110 shadow-[0_0_10px_#fbbf24]'
-              : 'w-8 h-8 border-white/50 bg-white/5'
+              ? 'w-7 h-7 border-amber-400 bg-amber-400/40 scale-95 shadow-[0_0_14px_#fbbf24]'
+              : tracking.isTargetHit
+              ? 'w-11 h-11 border-cyan-400 bg-cyan-400/20 scale-110 shadow-[0_0_12px_#38bdf8]'
+              : 'w-8 h-8 border-slate-700/80 bg-white/40 shadow-sm'
           }`}
         >
           <div
             className={`rounded-full transition-all duration-150 ${
-              tracking.isPinching ? 'w-2 h-2 bg-amber-300' : 'w-1.5 h-1.5 bg-white/80'
+              tracking.isPinching
+                ? 'w-2.5 h-2.5 bg-amber-400'
+                : tracking.isTargetHit
+                ? 'w-2 h-2 bg-cyan-300'
+                : 'w-1.5 h-1.5 bg-slate-800'
             }`}
           />
         </div>
 
         {tracking.isPinching && (
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-mono text-amber-300 bg-slate-900/90 px-1.5 py-0.5 rounded border border-amber-400/40">
+          <div className="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-mono text-amber-300 bg-slate-950/95 px-2 py-0.5 rounded-full border border-amber-400/60 shadow-md">
             PINCH
           </div>
         )}

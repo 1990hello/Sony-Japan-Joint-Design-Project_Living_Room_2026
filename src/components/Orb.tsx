@@ -115,70 +115,93 @@ export const Orb: React.FC<OrbProps> = ({
           {/* MINIATURE LUMIS INSIDE THE ORB */}
           {isInsideWorld && (
             <div className="absolute inset-0 pointer-events-none">
-              {/* State 0: Subtle cozy resting silhouettes */}
+              {/* State 0: Subtle cozy resting silhouettes of all 4 Lumori */}
               {state === ExperienceState.STATE_0_DORMANT_ORB && (
-                <div className="absolute bottom-7 inset-x-0 flex items-center justify-center gap-3">
-                  {/* Kiko sleeping curl */}
-                  <div className="relative w-6 h-6 rounded-full bg-amber-400/80 shadow-[0_0_10px_#f59e0b] animate-pulse">
-                    <div className="absolute top-1 left-2 w-1 h-0.5 bg-amber-900 rounded-full" />
-                    <div className="absolute -top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-300" />
+                <div className="absolute bottom-6 inset-x-0 flex items-center justify-center gap-2">
+                  {/* Sprout sleeping curl */}
+                  <div className="relative w-5 h-5 rounded-full bg-blue-400/80 shadow-[0_0_8px_#38bdf8] animate-pulse">
+                    <div className="absolute -top-1 right-1 w-1.5 h-1.5 rounded-full bg-green-400" />
                   </div>
-                  {/* Mori resting curl */}
+                  {/* Bellflower resting curl */}
                   <div
-                    className="relative w-6 h-6 rounded-full bg-teal-300/85 shadow-[0_0_10px_#14b8a6] animate-pulse"
-                    style={{ animationDelay: '0.8s' }}
+                    className="relative w-5 h-5 rounded-full bg-teal-300/85 shadow-[0_0_8px_#2dd4bf] animate-pulse"
+                    style={{ animationDelay: '0.5s' }}
                   >
-                    <div className="absolute top-1 left-2 w-1 h-0.5 bg-teal-950 rounded-full" />
-                    <div className="absolute -top-1 left-1 w-1.5 h-1.5 rounded-full bg-teal-200" />
+                    <div className="absolute -top-1 left-1 w-1.5 h-1.5 rounded-full bg-cyan-200" />
+                  </div>
+                  {/* Sakura resting curl */}
+                  <div
+                    className="relative w-5 h-5 rounded-full bg-pink-400/85 shadow-[0_0_8px_#f472b6] animate-pulse"
+                    style={{ animationDelay: '1s' }}
+                  >
+                    <div className="absolute -top-1 left-1 w-1.5 h-1.5 rounded-full bg-pink-200" />
+                  </div>
+                  {/* Lotus resting curl */}
+                  <div
+                    className="relative w-5 h-5 rounded-full bg-purple-400/85 shadow-[0_0_8px_#c084fc] animate-pulse"
+                    style={{ animationDelay: '1.5s' }}
+                  >
+                    <div className="absolute -top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-300" />
                   </div>
                 </div>
               )}
 
-              {/* State 7: Active persistent living idling world */}
+              {/* State 7: Active persistent living idling world (All 4 Lumori) */}
               {isIdling && (
                 <div className="absolute bottom-6 inset-x-0 transition-all duration-700">
                   {miniActivity === 0 && (
-                    /* Activity 0: Lumis sitting under the miniature tree together */
-                    <div className="flex items-center justify-center gap-3 animate-fade-in">
-                      <div className="relative w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 shadow-[0_0_12px_#fbbf24] flex items-center justify-center">
-                        <span className="text-[8px] text-amber-950 font-bold select-none">^.^</span>
+                    <div className="flex items-center justify-center gap-2 animate-fade-in">
+                      <div className="relative w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-blue-300 shadow-[0_0_10px_#60a5fa] flex items-center justify-center">
+                        <span className="text-[7px] text-blue-950 font-bold select-none">^.^</span>
                       </div>
-                      <div className="relative w-7 h-7 rounded-full bg-gradient-to-tr from-teal-500 to-teal-300 shadow-[0_0_12px_#2dd4bf] flex items-center justify-center">
-                        <span className="text-[8px] text-teal-950 font-bold select-none">^.^</span>
+                      <div className="relative w-6 h-6 rounded-full bg-gradient-to-tr from-teal-500 to-teal-300 shadow-[0_0_10px_#2dd4bf] flex items-center justify-center">
+                        <span className="text-[7px] text-teal-950 font-bold select-none">^.^</span>
+                      </div>
+                      <div className="relative w-5 h-5 rounded-full bg-gradient-to-tr from-pink-500 to-pink-300 shadow-[0_0_8px_#f472b6] flex items-center justify-center">
+                        <span className="text-[6px] text-pink-950 font-bold">♥</span>
+                      </div>
+                      <div className="relative w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-purple-300 shadow-[0_0_8px_#c084fc] flex items-center justify-center">
+                        <span className="text-[6px] text-purple-950 font-bold">♫</span>
                       </div>
                     </div>
                   )}
 
                   {miniActivity === 1 && (
-                    /* Activity 1: Mori gazing out glass while Kiko wanders near waterfall */
-                    <div className="flex items-center justify-between px-6 animate-fade-in">
-                      <div className="relative w-6 h-6 rounded-full bg-amber-400 shadow-[0_0_10px_#fbbf24] translate-y-1">
-                        <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px]">♫</div>
+                    <div className="flex items-center justify-around px-4 animate-fade-in">
+                      <div className="relative w-5 h-5 rounded-full bg-pink-400 shadow-[0_0_8px_#f472b6]">
+                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[7px]">♫</div>
                       </div>
-                      <div className="relative w-7 h-7 rounded-full bg-teal-300 shadow-[0_0_12px_#5eead4] flex items-center justify-center">
-                        <span className="text-[9px] text-teal-900 font-bold">♥</span>
+                      <div className="relative w-6 h-6 rounded-full bg-blue-400 shadow-[0_0_10px_#38bdf8] flex items-center justify-center">
+                        <span className="text-[7px] text-blue-950 font-bold">♥</span>
                       </div>
+                      <div className="relative w-5 h-5 rounded-full bg-teal-300 shadow-[0_0_8px_#5eead4] flex items-center justify-center">
+                        <span className="text-[7px] text-teal-900 font-bold">^.^</span>
+                      </div>
+                      <div className="relative w-5 h-5 rounded-full bg-purple-400 shadow-[0_0_8px_#c084fc]" />
                     </div>
                   )}
 
                   {miniActivity === 2 && (
-                    /* Activity 2: Playful hop and twirl */
-                    <div className="flex items-center justify-center gap-4 animate-fade-in">
-                      <div className="relative w-7 h-7 rounded-full bg-amber-300 shadow-[0_0_14px_#fbbf24] animate-bounce">
-                        <div className="absolute top-1.5 left-2 w-1.5 h-1.5 rounded-full bg-amber-950" />
+                    <div className="flex items-center justify-center gap-2 animate-fade-in">
+                      <div className="relative w-6 h-6 rounded-full bg-blue-300 shadow-[0_0_12px_#93c5fd] animate-bounce">
+                        <div className="absolute top-1 left-1.5 w-1 h-1 rounded-full bg-blue-950" />
                       </div>
-                      <div className="relative w-6 h-6 rounded-full bg-teal-400 shadow-[0_0_10px_#14b8a6]">
-                        <div className="absolute top-1 left-2 w-1.5 h-1.5 rounded-full bg-teal-950" />
+                      <div className="relative w-5 h-5 rounded-full bg-teal-400 shadow-[0_0_8px_#14b8a6]">
+                        <div className="absolute top-1 left-1.5 w-1 h-1 rounded-full bg-teal-950" />
+                      </div>
+                      <div className="relative w-5 h-5 rounded-full bg-pink-300 shadow-[0_0_8px_#f9a8d4] animate-bounce" style={{ animationDelay: '0.3s' }}>
+                        <div className="absolute top-1 left-1.5 w-1 h-1 rounded-full bg-pink-950" />
                       </div>
                     </div>
                   )}
 
                   {miniActivity === 3 && (
-                    /* Activity 3: Peaceful resting curled up */
-                    <div className="flex items-center justify-center gap-2 animate-fade-in">
-                      <div className="relative w-6 h-5 rounded-full bg-amber-400/90 shadow-[0_0_8px_#f59e0b]" />
-                      <div className="relative w-6 h-5 rounded-full bg-teal-300/90 shadow-[0_0_8px_#0d9488]" />
-                      <span className="text-[9px] text-cyan-200/80 animate-pulse ml-1">zZ</span>
+                    <div className="flex items-center justify-center gap-1.5 animate-fade-in">
+                      <div className="relative w-5 h-4.5 rounded-full bg-blue-400/90 shadow-[0_0_6px_#3b82f6]" />
+                      <div className="relative w-5 h-4.5 rounded-full bg-teal-300/90 shadow-[0_0_6px_#0d9488]" />
+                      <div className="relative w-4.5 h-4 rounded-full bg-pink-300/90 shadow-[0_0_6px_#db2777]" />
+                      <div className="relative w-4.5 h-4 rounded-full bg-purple-400/90 shadow-[0_0_6px_#7c3aed]" />
+                      <span className="text-[8px] text-cyan-200/80 animate-pulse ml-0.5">zZ</span>
                     </div>
                   )}
                 </div>

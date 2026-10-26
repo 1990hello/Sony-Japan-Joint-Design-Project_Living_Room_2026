@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ExperienceState, isWindmillState } from './types';
+import { ExperienceState, InteractionTarget, isWindmillState } from './types';
 import { LumoriStateMachine } from './stateMachine';
 import { useHandTracking } from './useHandTracking';
 import { LivingRoom } from './components/LivingRoom';
@@ -27,6 +27,7 @@ export default function App() {
 
   // Trigger Return to Orb Command
   const handleTriggerReturnToOrb = useCallback(() => {
+    // Return to orb is valid from any room state outside the orb
     if (
       state === ExperienceState.STATE_0_DORMANT_ORB ||
       state === ExperienceState.STATE_6_RETURN_TO_ORB ||
@@ -45,7 +46,6 @@ export default function App() {
 
   // Handle Windmill User Interaction (Blowing / Waving / Clicking)
   const handleWindmillUserInteract = useCallback(() => {
-    // Only accept if currently in an interactive windmill sub-state
     if (
       state === ExperienceState.STATE_2C_INVITATION ||
       state === ExperienceState.STATE_2A_DISCOVERY ||
@@ -70,31 +70,29 @@ export default function App() {
     }, 2500);
   }, [moriRescued]);
 
-  // Hand tracking hook
+  // Unified Target Action Dispatcher (called by webcam pinch, mouse click, and debug tests)
+  const handleExecuteTargetAction = useCallback(
+    (target: InteractionTarget) => {
+      if (target === 'orb') {
+        handleTriggerReturnToOrb();
+      } else if (target === 'windmill') {
+        handleWindmillUserInteract();
+      } else if (target === 'sofa_rescue') {
+        handleRescueMori();
+      }
+    },
+    [handleTriggerReturnToOrb, handleWindmillUserInteract, handleRescueMori]
+  );
+
+  // Robust Hand tracking hook with fresh state and DOM hit testing
   const {
     trackingState,
     videoRef,
     toggleCamera,
+    triggerActionForTarget,
   } = useHandTracking({
-    onPinchAtOrb: handleTriggerReturnToOrb,
-    onPinchStart: (clientX, clientY) => {
-      // Windmill gesture proxy (pinch or wave near windmill)
-      const normX = clientX / window.innerWidth;
-      const normY = clientY / window.innerHeight;
-
-      if (isWindmillState(state)) {
-        if (normX >= 0.22 && normX <= 0.60 && normY >= 0.48 && normY <= 0.90) {
-          handleWindmillUserInteract();
-        }
-      }
-
-      // Sofa cushion crevice rescue
-      if (state === ExperienceState.STATE_4_HELPING_FRIEND && !moriRescued) {
-        if (normX >= 0.70 && normX <= 0.88 && normY >= 0.45 && normY <= 0.75) {
-          handleRescueMori();
-        }
-      }
-    },
+    appState: state,
+    onExecuteTargetAction: handleExecuteTargetAction,
   });
 
   // Initialize state machine on mount
@@ -178,15 +176,15 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans">
+    <div className="relative w-screen h-screen overflow-hidden bg-[#FAF8F5] font-sans">
       {/* Hidden webcam video element for hand tracking processing */}
       <video
         ref={videoRef}
         playsInline
         muted
         autoPlay
-        className={`absolute bottom-4 left-4 w-32 h-24 object-cover rounded-xl border border-white/20 shadow-xl z-40 transition-opacity duration-300 pointer-events-none ${
-          trackingState.isActive ? 'opacity-70' : 'opacity-0'
+        className={`absolute bottom-4 left-4 w-32 h-24 object-cover rounded-xl border border-stone-300 shadow-xl z-40 transition-opacity duration-300 pointer-events-none ${
+          trackingState.isActive ? 'opacity-80' : 'opacity-0'
         }`}
       />
 
@@ -228,6 +226,17 @@ export default function App() {
           onEnterLumoriIdling={() => handleSetState(ExperienceState.STATE_7_LUMORI_IDLING)}
           onSimulateWindmillUserHelp={handleWindmillUserInteract}
           onTriggerWindmillAutonomous={() => stateMachineRef.current?.transitionTo(ExperienceState.STATE_2E_AUTONOMOUS)}
+          onSimulatePinchOnCurrentTarget={() => {
+            if (trackingState.currentTarget !== 'none') {
+              triggerActionForTarget(trackingState.currentTarget);
+            } else if (isWindmillState(state)) {
+              handleWindmillUserInteract();
+            } else if (state === ExperienceState.STATE_4_HELPING_FRIEND) {
+              handleRescueMori();
+            } else {
+              handleTriggerReturnToOrb();
+            }
+          }}
           onToggleAutoTransitions={() => setAutoTransitions(!autoTransitions)}
           onToggleCamera={toggleCamera}
           onOpenStoryboard={() => setShowStoryboard(true)}

@@ -113,6 +113,17 @@ export const STATE_METAS: Record<ExperienceState, StateMeta> = {
   },
 };
 
+export type LumiLocation =
+  | 'insideOrb'
+  | 'emergingOnShelf'
+  | 'travellingToTable'
+  | 'atWindmill'
+  | 'travellingToSofa'
+  | 'atSofa'
+  | 'returningToShelf';
+
+export type InteractionTarget = 'none' | 'orb' | 'windmill' | 'sofa_rescue';
+
 export interface HandTrackingState {
   isActive: boolean;
   isPinching: boolean;
@@ -120,6 +131,10 @@ export interface HandTrackingState {
   pinchY: number; // 0 to 1 normalized
   isInsideOrb: boolean;
   isNearWindmill: boolean;
+  currentTarget: InteractionTarget;
+  isTargetHit: boolean;
+  lastActionTriggered: string;
+  landmarksCount: number;
   permissionStatus: 'idle' | 'requesting' | 'granted' | 'denied' | 'unsupported';
   source: 'webcam' | 'mouse';
   lastPinchTime: number;

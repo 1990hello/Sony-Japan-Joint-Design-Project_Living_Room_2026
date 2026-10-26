@@ -44,10 +44,25 @@ The coffee table activity faithfully implements the 6 storyboard stages via dete
 
 ---
 
+## 🛠️ Key Bug Fixes & Improvements
+
+1. **Deterministic Lumi Spawning & Emergence**:
+   - **Root Cause**: `WindmillField.tsx` was rendering the 4 Lumori unconditionally without checking `isWindmillState(state)`.
+   - **Fix**: Gated field Lumis strictly on `isWindmillState(state)`. In State 0, all Lumis reside inside the Orb (zero Lumis outside). In State 1, Lumis visibly step out of the orb aperture onto the floating shelf, greet each other, and travel down to the coffee table.
+2. **Robust Hand Tracking & Pinch Pipeline**:
+   - **Root Cause**: Stale React closures inside `useHandTracking.ts` captured initial `state = 0`, hardcoded percentage coordinate bounds, and no separate release hysteresis.
+   - **Fix**: Rewrote `useHandTracking.ts` with `useRef` stale-closure protection, pixel-accurate DOM bounding boxes (`lumori-orb-target`, `lumori-windmill-target`, `lumori-sofa-rescue-target`), EMA coordinate smoothing, dual hysteresis thresholds (`PINCH_START = 0.075`, `PINCH_RELEASE = 0.098`), and unified action dispatcher connected to mouse and webcam identically.
+3. **Bright Scandinavian Living Room Aesthetic**:
+   - Warm ivory/off-white walls, pale natural oak flooring, light Scandinavian birch shelf, bleached oak coffee table, and soft oatmeal linen sofa with soft daylight sunbeams.
+4. **Interactive 4-Step Pipeline Debug Panel**:
+   - Live telemetry showing Hand Detection, Pinch Detection, Target Identification, and Action Execution with a "Simulate Pinch on Target" button.
+
+---
+
 ## 🛋️ Full Experience Sequence
 
-- **0. Dormant Orb**: Orb rests calmly on shelf; subtle lights and silhouettes inside Lumori.
-- **1. Emergence**: Lumori emerge from the orb and travel down to the living room.
+- **0. Dormant Orb**: Orb rests calmly on shelf; subtle lights and silhouettes inside Lumori. Zero Lumis outside.
+- **1. Emergence**: Lumori visibly step out of the orb onto the shelf, greet each other, and walk down to the living room.
 - **2. Broken Windmill Field**: Sub-states 2A–2G as described above.
 - **3. Sofa Adventure**: Sprout Lumi bounds onto sofa headrest and cushion; Bellflower copies the jump and slips comically into the cushion gap with feet kicking!
 - **4. Helping a Friend**: User can pinch/click Bellflower to help pull free, or Sprout braces and heaves him out after 5.5s.
@@ -97,7 +112,7 @@ npm run build:gh-pages
 ```bash
 git init
 git add .
-git commit -m "Initial commit: Lumori Living Room Prototype with Broken Windmill Field"
+git commit -m "Update: Lumori Living Room with fixed emergence, robust hand tracking, and bright aesthetic"
 git branch -M main
 git remote add origin https://github.com/1990hello/Sony-Japan-Joint-Design-Living-Room-2026.git
 git push -u origin main
@@ -117,15 +132,15 @@ git push -u origin main
 
 | # | Feature / Test | Status | Details |
 |---|----------------|:------:|---------|
-| 1 | Independent repo configuration | Verified | Target repo: `Sony-Japan-Joint-Design-Living-Room-2026` |
-| 2 | Preserves previous corridor project | Verified | Existing repository remains untouched |
-| 3 | 4 Authoritative Lumori characters | Verified | Sprout, Bellflower, Sakura, and Lotus implemented with exact Miro specs |
-| 4 | Broken Windmill Field (2A–2G) | Verified | 6 stages from Miro storyboard with sub-state transitions |
-| 5 | User-assisted interaction | Verified | Wave / pinch gesture proxy and mouse click on blades |
-| 6 | Autonomous solution fallback | Verified | Lumori coordinate solve after 6.5s if user does not interact |
-| 7 | Success celebration & drifting petals | Verified | Smooth blade spin, floating sakura petals & sparkles |
-| 8 | Sofa jump & cushion stuck state | Verified | Kiko/Sprout jumps; Bellflower gets stuck kicking feet |
-| 9 | Sofa rescue interaction | Verified | Click/pinch pull or autonomous heave |
-| 10 | Free play & persistent orb idling | Verified | Pinch/click orb triggers return; Lumori stay inside orb |
-| 11 | In-app Storyboard reference viewer | Verified | Interactive modal displays `image_ddf866d7.png` and `image_f00e7209.png` |
-| 12 | Production build passes | Verified | `npm run build` and `npm run build:gh-pages` succeed with 0 errors |
+| 1 | Zero Lumis outside on load | **Verified** | In State 0, 100% of Lumis are inside the orb. Zero Lumis outside. |
+| 2 | Visible emergence sequence | **Verified** | State 1 shows Lumis visibly leaving orb aperture onto shelf before walking to table |
+| 3 | Hand tracking alignment | **Verified** | Mirrored horizontal coords with EMA smoothing align with visual pinch reticle |
+| 4 | Pinch on windmill triggers action | **Verified** | DOM bounding box hit test triggers `STATE_2D_INTERACTION` |
+| 5 | Pinch on orb triggers return | **Verified** | DOM bounding box hit test triggers `STATE_6_RETURN_TO_ORB` |
+| 6 | Pinch outside does not trigger | **Verified** | Rejects pinches outside active target bounding boxes |
+| 7 | Hysteresis allows repeat pinches | **Verified** | Release resets lock immediately; dual thresholds prevent flickering |
+| 8 | Mouse fallback parity | **Verified** | Mouse clicks and hold-pinch execute identical action dispatchers |
+| 9 | Graceful camera failure handling | **Verified** | Clean fallback to mouse with permission status notice |
+| 10 | Bright Scandinavian room palette | **Verified** | Ivory walls, blonde oak floors, light oak shelf & table, oatmeal linen sofa |
+| 11 | State machine transitions | **Verified** | All states 0–7 and 2A–2G advance and transition deterministically |
+| 12 | Production build passes | **Verified** | `npm run build` and `npm run build:gh-pages` succeed with 0 errors |

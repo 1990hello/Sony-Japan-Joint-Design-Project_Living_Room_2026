@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExperienceState, HandTrackingState, STATE_METAS } from '../types';
-import { X, Play, RotateCcw, SkipForward, Home, Pause, Camera, Wind, BookOpen } from 'lucide-react';
+import { X, Play, RotateCcw, SkipForward, Home, Pause, Camera, Wind, BookOpen, HandMetal, Target } from 'lucide-react';
 
 interface DebugPanelProps {
   state: ExperienceState;
@@ -13,6 +13,7 @@ interface DebugPanelProps {
   onEnterLumoriIdling: () => void;
   onSimulateWindmillUserHelp: () => void;
   onTriggerWindmillAutonomous: () => void;
+  onSimulatePinchOnCurrentTarget: () => void;
   onToggleAutoTransitions: () => void;
   onToggleCamera: () => void;
   onOpenStoryboard: () => void;
@@ -30,6 +31,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   onEnterLumoriIdling,
   onSimulateWindmillUserHelp,
   onTriggerWindmillAutonomous,
+  onSimulatePinchOnCurrentTarget,
   onToggleAutoTransitions,
   onToggleCamera,
   onOpenStoryboard,
@@ -57,13 +59,13 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   ];
 
   return (
-    <div className="no-gesture-trigger absolute right-4 top-16 z-50 w-88 rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl p-4 text-slate-200 font-sans backdrop-blur-xl animate-fade-in select-none">
+    <div className="no-gesture-trigger absolute right-4 top-16 z-50 w-92 rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl p-4 text-slate-200 font-sans backdrop-blur-xl animate-fade-in select-none">
       {/* Panel Header */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-cyan-400" />
           <h2 className="text-xs font-mono font-bold tracking-wider text-slate-100 uppercase">
-            Debug & State Controls
+            Debug & Interaction Pipeline
           </h2>
         </div>
         <button
@@ -75,7 +77,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         </button>
       </div>
 
-      {/* State Telemetry */}
+      {/* State Machine Status */}
       <div className="space-y-1.5 mb-3 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 text-xs">
         <div className="flex justify-between items-center">
           <span className="text-slate-400">Current State:</span>
@@ -95,21 +97,91 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             {autoTransitions ? 'ENABLED' : 'PAUSED'}
           </span>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-slate-400">Near Windmill:</span>
-          <span className={tracking.isNearWindmill ? 'text-cyan-300 font-bold' : 'text-slate-500'}>
-            {tracking.isNearWindmill ? 'IN RANGE' : 'NO'}
+      </div>
+
+      {/* 4-Step Interaction Pipeline Telemetry */}
+      <div className="space-y-1.5 mb-3 bg-slate-900/70 p-2.5 rounded-lg border border-slate-800/80 text-xs font-mono">
+        <div className="text-[10px] text-cyan-300 uppercase tracking-wider mb-1 font-sans flex items-center gap-1.5">
+          <Target className="w-3.5 h-3.5" />
+          <span>4-Step Interaction Pipeline</span>
+        </div>
+
+        {/* Step 1: Hand Detected */}
+        <div className="flex justify-between">
+          <span className="text-slate-400 font-sans">1. Hand Detected:</span>
+          <span className={tracking.isActive && tracking.landmarksCount > 0 ? 'text-emerald-400' : 'text-slate-500'}>
+            {tracking.source === 'webcam'
+              ? tracking.landmarksCount > 0
+                ? `YES (${tracking.landmarksCount} pts)`
+                : 'WAITING (Out of frame)'
+              : 'MOUSE ACTIVE'}
+          </span>
+        </div>
+
+        {/* Step 2: Pinch State */}
+        <div className="flex justify-between">
+          <span className="text-slate-400 font-sans">2. Pinch Detected:</span>
+          <span className={tracking.isPinching ? 'text-amber-400 font-bold' : 'text-slate-500'}>
+            {tracking.isPinching ? 'PINCHING (Closed)' : 'OPEN (Released)'}
+          </span>
+        </div>
+
+        {/* Coords */}
+        <div className="flex justify-between">
+          <span className="text-slate-400 font-sans">Pinch Point (X, Y):</span>
+          <span className="text-slate-300 tabular-nums">
+            {(tracking.pinchX * 100).toFixed(1)}%, {(tracking.pinchY * 100).toFixed(1)}%
+          </span>
+        </div>
+
+        {/* Step 3: Target Identified */}
+        <div className="flex justify-between">
+          <span className="text-slate-400 font-sans">3. Target Identified:</span>
+          <span
+            className={
+              tracking.currentTarget !== 'none'
+                ? 'text-cyan-300 font-bold uppercase'
+                : 'text-slate-500'
+            }
+          >
+            {tracking.currentTarget.replace('_', ' ')}
+          </span>
+        </div>
+
+        {/* Step 3b: Hit Test */}
+        <div className="flex justify-between">
+          <span className="text-slate-400 font-sans">Hit Test Succeeded:</span>
+          <span className={tracking.isTargetHit ? 'text-emerald-400 font-bold' : 'text-slate-500'}>
+            {tracking.isTargetHit ? 'TRUE (Intersected)' : 'FALSE'}
+          </span>
+        </div>
+
+        {/* Step 4: Action Executed */}
+        <div className="flex justify-between border-t border-slate-800 pt-1">
+          <span className="text-slate-400 font-sans">4. Last Action Executed:</span>
+          <span className="text-amber-300 font-medium truncate max-w-[150px]">
+            {tracking.lastActionTriggered}
           </span>
         </div>
       </div>
+
+      {/* Test Button: Simulate Pinch on Target */}
+      <button
+        type="button"
+        onClick={onSimulatePinchOnCurrentTarget}
+        className="w-full mb-3 flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-amber-600/70 to-orange-600/70 hover:from-amber-500/80 hover:to-orange-500/80 border border-amber-400/50 text-amber-100 text-xs rounded-xl font-bold cursor-pointer shadow-lg transition-all active:scale-95"
+      >
+        <HandMetal className="w-4 h-4 text-amber-200" />
+        <span>Simulate Pinch on Target</span>
+      </button>
 
       {/* Storyboard Button */}
       <button
         type="button"
         onClick={onOpenStoryboard}
-        className="w-full mb-3 flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-cyan-900/60 to-blue-900/60 hover:from-cyan-800/70 hover:to-blue-800/70 border border-cyan-500/40 text-cyan-200 text-xs rounded-xl font-medium cursor-pointer shadow-lg transition-all"
+        className="w-full mb-3 flex items-center justify-center gap-2 py-1.5 px-3 bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-200 text-xs rounded-xl font-medium cursor-pointer transition-all"
       >
-        <BookOpen className="w-4 h-4 text-cyan-300" />
+        <BookOpen className="w-3.5 h-3.5 text-cyan-300" />
         <span>View Miro Storyboard & Characters</span>
       </button>
 
