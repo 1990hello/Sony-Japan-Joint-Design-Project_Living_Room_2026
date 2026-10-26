@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #0b0f19;
+    color: #f1f5f9;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* Custom Creature & AR Keyframes */
+
+@keyframes lumiFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1deg);
+  }
+}
+
+@keyframes lumiBounce {
+  0%, 100% {
+    transform: translateY(0px) scale(1, 1);
+  }
+  30% {
+    transform: translateY(-10px) scale(0.95, 1.05);
+  }
+  60% {
+    transform: translateY(0px) scale(1.05, 0.95);
+  }
+}
+
+@keyframes lumiBlink {
+  0%, 92%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes wiggleStuck {
+  0%, 100% {
+    transform: rotate(178deg) translateY(4px);
+  }
+  50% {
+    transform: rotate(182deg) translateY(2px);
+  }
+}
+
+@keyframes footKickLeft {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-24deg);
+  }
+}
+
+@keyframes footKickRight {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(26deg);
+  }
+}
+
+@keyframes tailWag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes earLeft {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes earRight {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes tuftBob {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-lumi-float {
+  animation: lumiFloat 3s ease-in-out infinite;
+}
+
+.animate-lumi-bounce {
+  animation: lumiBounce 1s ease-in-out infinite;
+}
+
+.animate-lumi-blink {
+  animation: lumiBlink 4s ease-in-out infinite;
+}
+
+.animate-wiggle-stuck {
+  animation: wiggleStuck 0.8s ease-in-out infinite;
+}
+
+.animate-foot-kick-left {
+  animation: footKickLeft 0.5s ease-in-out infinite;
+}
+
+.animate-foot-kick-right {
+  animation: footKickRight 0.5s ease-in-out infinite 0.25s;
+}
+
+.animate-tail-wag {
+  animation: tailWag 1.8s ease-in-out infinite;
+}
+
+.animate-ear-left {
+  animation: earLeft 2s ease-in-out infinite;
+}
+
+.animate-ear-right {
+  animation: earRight 2.2s ease-in-out infinite;
+}
+
+.animate-tuft-bob {
+  animation: tuftBob 2.5s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

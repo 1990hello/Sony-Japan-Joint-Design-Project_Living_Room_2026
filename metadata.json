@@ -1,0 +1,6 @@
+{
+  "name": "Lumori Living Room Prototype",
+  "description": "AR-style living room prototype with Lumis exploring, cooperating, and living in their persistent miniature orb world.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
