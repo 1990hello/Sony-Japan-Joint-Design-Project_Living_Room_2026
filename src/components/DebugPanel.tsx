@@ -1,6 +1,6 @@
 import React from 'react';
-import { ExperienceState, HandTrackingState, STATE_METAS } from '../types';
-import { X, Play, RotateCcw, SkipForward, Home, Pause, Camera, Wind, BookOpen, HandMetal, Target } from 'lucide-react';
+import { ExperienceState, HandTrackingState, STATE_METAS, isWindmillZoomed } from '../types';
+import { X, Play, RotateCcw, SkipForward, Home, Pause, Camera, Wind, BookOpen, HandMetal, Target, Eye } from 'lucide-react';
 
 interface DebugPanelProps {
   state: ExperienceState;
@@ -48,6 +48,8 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     state === ExperienceState.STATE_4_HELPING_FRIEND ||
     state === ExperienceState.STATE_5_FREE_PLAY;
 
+  const isZoomed = isWindmillZoomed(state);
+
   const windmillStates: { label: string; state: ExperienceState }[] = [
     { label: '2A Disc', state: ExperienceState.STATE_2A_DISCOVERY },
     { label: '2B Obs', state: ExperienceState.STATE_2B_OBSERVATION },
@@ -56,10 +58,11 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     { label: '2E Auto', state: ExperienceState.STATE_2E_AUTONOMOUS },
     { label: '2F Succ', state: ExperienceState.STATE_2F_SUCCESS },
     { label: '2G Clos', state: ExperienceState.STATE_2G_CLOSURE },
+    { label: '2 ZoomOut', state: ExperienceState.STATE_2_ZOOM_OUT },
   ];
 
   return (
-    <div className="no-gesture-trigger absolute right-4 top-16 z-50 w-92 rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl p-4 text-slate-200 font-sans backdrop-blur-xl animate-fade-in select-none">
+    <div className="no-gesture-trigger absolute right-4 top-16 z-50 w-96 rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl p-4 text-slate-200 font-sans backdrop-blur-xl animate-fade-in select-none">
       {/* Panel Header */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
         <div className="flex items-center gap-2">
@@ -83,6 +86,12 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           <span className="text-slate-400">Current State:</span>
           <span className="font-mono font-bold text-amber-300">
             {currentMeta.name}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-slate-400">Camera View:</span>
+          <span className={`font-mono text-[11px] font-bold ${isZoomed ? 'text-amber-300' : 'text-emerald-400'}`}>
+            {isZoomed ? 'ZOOMED IN (2.05x Table)' : 'FULL ROOM (1.0x)'}
           </span>
         </div>
         <div className="flex justify-between items-center">
@@ -305,21 +314,22 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         <div className="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">
           Jump to Other States
         </div>
-        <div className="grid grid-cols-6 gap-1">
+        <div className="grid grid-cols-4 gap-1">
           {[
-            { label: 'S0', state: ExperienceState.STATE_0_DORMANT_ORB },
-            { label: 'S1', state: ExperienceState.STATE_1_EMERGENCE },
-            { label: 'S3', state: ExperienceState.STATE_3_SOFA_ADVENTURE },
-            { label: 'S4', state: ExperienceState.STATE_4_HELPING_FRIEND },
-            { label: 'S5', state: ExperienceState.STATE_5_FREE_PLAY },
-            { label: 'S6', state: ExperienceState.STATE_6_RETURN_TO_ORB },
-            { label: 'S7', state: ExperienceState.STATE_7_LUMORI_IDLING },
+            { label: 'S0 Orb', state: ExperienceState.STATE_0_DORMANT_ORB },
+            { label: 'S1 Emerge', state: ExperienceState.STATE_1_EMERGENCE },
+            { label: 'S3 Sofa', state: ExperienceState.STATE_3_SOFA_ADVENTURE },
+            { label: 'S4 Help', state: ExperienceState.STATE_4_HELPING_FRIEND },
+            { label: 'S4B Reun', state: ExperienceState.STATE_4B_RESCUED_REUNION },
+            { label: 'S5 Play', state: ExperienceState.STATE_5_FREE_PLAY },
+            { label: 'S6 Return', state: ExperienceState.STATE_6_RETURN_TO_ORB },
+            { label: 'S7 Idle', state: ExperienceState.STATE_7_LUMORI_IDLING },
           ].map((item) => (
             <button
               key={item.label}
               type="button"
               onClick={() => onSetState(item.state)}
-              className={`py-1 rounded text-xs font-mono transition-all cursor-pointer ${
+              className={`py-1 rounded text-[11px] font-mono transition-all cursor-pointer ${
                 state === item.state
                   ? 'bg-amber-400 text-slate-950 font-bold'
                   : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white'

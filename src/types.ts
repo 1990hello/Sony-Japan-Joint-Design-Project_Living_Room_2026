@@ -1,7 +1,7 @@
 export enum ExperienceState {
   STATE_0_DORMANT_ORB = 0,
   STATE_1_EMERGENCE = 1,
-  // State 2: Broken Windmill Field (Sub-states 2A - 2G)
+  // State 2: Broken Windmill Field (Sub-states 2A - 2G & Zoom-Out)
   STATE_2A_DISCOVERY = 20,
   STATE_2B_OBSERVATION = 21,
   STATE_2C_INVITATION = 22,
@@ -9,9 +9,12 @@ export enum ExperienceState {
   STATE_2E_AUTONOMOUS = 24,
   STATE_2F_SUCCESS = 25,
   STATE_2G_CLOSURE = 26,
-  // Remaining States
+  STATE_2_ZOOM_OUT = 27,
+  // Sofa States
   STATE_3_SOFA_ADVENTURE = 3,
   STATE_4_HELPING_FRIEND = 4,
+  STATE_4B_RESCUED_REUNION = 41,
+  // Remaining States
   STATE_5_FREE_PLAY = 5,
   STATE_6_RETURN_TO_ORB = 6,
   STATE_7_LUMORI_IDLING = 7,
@@ -41,15 +44,15 @@ export const STATE_METAS: Record<ExperienceState, StateMeta> = {
   },
   [ExperienceState.STATE_2A_DISCOVERY]: {
     id: ExperienceState.STATE_2A_DISCOVERY,
-    name: "2A — Windmill Discovery",
-    shortDesc: "A tiny windmill field appears on the coffee table.",
+    name: "2A — Windmill Discovery (Zoom In)",
+    shortDesc: "Camera zooms in to the tiny windmill field on the coffee table.",
     userHint: "The Lumori gather around the broken windmill on the table.",
   },
   [ExperienceState.STATE_2B_OBSERVATION]: {
     id: ExperienceState.STATE_2B_OBSERVATION,
     name: "2B — Windmill Observation",
-    shortDesc: "The Lumori inspect the stalled windmill blades.",
-    userHint: "One Lumori inspects the cog while another tries to push the blade.",
+    shortDesc: "The Lumori inspect the blades and find tools in the crate.",
+    userHint: "Sakura fetches tools while Sprout and Lotus inspect the hub.",
   },
   [ExperienceState.STATE_2C_INVITATION]: {
     id: ExperienceState.STATE_2C_INVITATION,
@@ -81,17 +84,29 @@ export const STATE_METAS: Record<ExperienceState, StateMeta> = {
     shortDesc: "Activity settles peacefully; Lumori admire the working mill.",
     userHint: "The Lumori rest contentedly near the working windmill.",
   },
+  [ExperienceState.STATE_2_ZOOM_OUT]: {
+    id: ExperienceState.STATE_2_ZOOM_OUT,
+    name: "2 — Windmill Zoom Out",
+    shortDesc: "Camera returns smoothly to full living room framing.",
+    userHint: "Returning to full living room view...",
+  },
   [ExperienceState.STATE_3_SOFA_ADVENTURE]: {
     id: ExperienceState.STATE_3_SOFA_ADVENTURE,
     name: "3 — Sofa Adventure",
-    shortDesc: "Lumi leaps and slips between sofa cushions!",
-    userHint: "Bellflower Lumi got playfully stuck between the cushions!",
+    shortDesc: "Sprout jumps to seat cushion; Bellflower lands in seat gap!",
+    userHint: "Bellflower Lumi got stuck in the seat cushion gap!",
   },
   [ExperienceState.STATE_4_HELPING_FRIEND]: {
     id: ExperienceState.STATE_4_HELPING_FRIEND,
-    name: "4 — Helping a Friend",
-    shortDesc: "Rescue your friend together or watch the autonomous heave.",
-    userHint: "Click/pinch the trapped Lumi to pull free, or watch Sprout help.",
+    name: "4 — Helping a Friend (Rescue)",
+    shortDesc: "Rescue Bellflower together or watch Sprout pull him out.",
+    userHint: "Click/pinch Bellflower to pull free, or watch Sprout help.",
+  },
+  [ExperienceState.STATE_4B_RESCUED_REUNION]: {
+    id: ExperienceState.STATE_4B_RESCUED_REUNION,
+    name: "4B — Reunion & Celebration",
+    shortDesc: "Bellflower is freed! Both Lumis celebrate on the sofa.",
+    userHint: "Rescued! Both Lumori celebrate together.",
   },
   [ExperienceState.STATE_5_FREE_PLAY]: {
     id: ExperienceState.STATE_5_FREE_PLAY,
@@ -171,6 +186,19 @@ export interface CreatureState {
 }
 
 export function isWindmillState(state: ExperienceState): boolean {
+  return (
+    state === ExperienceState.STATE_2A_DISCOVERY ||
+    state === ExperienceState.STATE_2B_OBSERVATION ||
+    state === ExperienceState.STATE_2C_INVITATION ||
+    state === ExperienceState.STATE_2D_INTERACTION ||
+    state === ExperienceState.STATE_2E_AUTONOMOUS ||
+    state === ExperienceState.STATE_2F_SUCCESS ||
+    state === ExperienceState.STATE_2G_CLOSURE ||
+    state === ExperienceState.STATE_2_ZOOM_OUT
+  );
+}
+
+export function isWindmillZoomed(state: ExperienceState): boolean {
   return (
     state === ExperienceState.STATE_2A_DISCOVERY ||
     state === ExperienceState.STATE_2B_OBSERVATION ||

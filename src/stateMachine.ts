@@ -72,8 +72,9 @@ export class LumoriStateMachine {
         }
         break;
 
-      // ---------------- STATE 2: BROKEN WINDMILL FIELD (SUB-STATES) ----------------
+      // ---------------- STATE 2: BROKEN WINDMILL FIELD (CAMERA ZOOMS IN) ----------------
       case ExperienceState.STATE_2A_DISCOVERY:
+        // Camera smoothly zooms in towards the windmill on the coffee table
         this.config.onPlayChirp('curious');
         if (this.config.autoTransitions) {
           this.addTimer(() => {
@@ -83,17 +84,18 @@ export class LumoriStateMachine {
         break;
 
       case ExperienceState.STATE_2B_OBSERVATION:
+        // Lumis inspect hub; Sakura searches crate for tool and carries it over
         this.config.onPlayChirp('curious');
         if (this.config.autoTransitions) {
           this.addTimer(() => {
             this.transitionTo(ExperienceState.STATE_2C_INVITATION);
-          }, 4000);
+          }, 4500);
         }
         break;
 
       case ExperienceState.STATE_2C_INVITATION:
         this.config.onPlayChirp('alert');
-        // User may interact (transitionTo STATE_2D_INTERACTION).
+        // User may assist (transitionTo STATE_2D_INTERACTION).
         // If user does not interact, autonomous fallback triggers after 6.5s:
         if (this.config.autoTransitions) {
           this.addTimer(() => {
@@ -138,25 +140,53 @@ export class LumoriStateMachine {
         // Activity calms down; Lumori admire working mill
         if (this.config.autoTransitions) {
           this.addTimer(() => {
-            this.config.onPlayChirp('curious');
-            this.transitionTo(ExperienceState.STATE_3_SOFA_ADVENTURE);
-          }, 4200);
+            this.transitionTo(ExperienceState.STATE_2_ZOOM_OUT);
+          }, 3500);
         }
         break;
 
-      // ---------------- REMAINING STATES ----------------
+      case ExperienceState.STATE_2_ZOOM_OUT:
+        // Camera smoothly zooms out to original full room perspective (1.5s)
+        // Windmill remains spinning continuously!
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.config.onPlayChirp('curious');
+            this.transitionTo(ExperienceState.STATE_3_SOFA_ADVENTURE);
+          }, 2200);
+        }
+        break;
+
+      // ---------------- SOFA SEQUENCE & RESCUE TRANSITION ----------------
       case ExperienceState.STATE_3_SOFA_ADVENTURE:
+        // Sprout jumps to seat cushion; Bellflower copies and slips into seat cushion gap!
         this.config.onPlayChirp('alert');
         if (this.config.autoTransitions) {
           this.addTimer(() => {
             this.transitionTo(ExperienceState.STATE_4_HELPING_FRIEND);
-          }, 3200);
+          }, 3600);
         }
         break;
 
       case ExperienceState.STATE_4_HELPING_FRIEND:
         this.config.onPlayChirp('curious');
-        // Autonomous heave triggers in App.tsx or timer after 5.5s if user does nothing
+        // Autonomous rescue timer fallback if user does not click/pinch to help:
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.config.onPlayPop();
+            this.transitionTo(ExperienceState.STATE_4B_RESCUED_REUNION);
+          }, 5500);
+        }
+        break;
+
+      case ExperienceState.STATE_4B_RESCUED_REUNION:
+        // Trapped Lumi emerges onto seat cushion. Both Lumis celebrate together!
+        this.config.onPlayChirp('happy');
+        // Automatically advance to Free Play after celebration without requiring another input!
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_5_FREE_PLAY);
+          }, 2800);
+        }
         break;
 
       case ExperienceState.STATE_5_FREE_PLAY:
@@ -193,8 +223,10 @@ export class LumoriStateMachine {
       ExperienceState.STATE_2D_INTERACTION,
       ExperienceState.STATE_2F_SUCCESS,
       ExperienceState.STATE_2G_CLOSURE,
+      ExperienceState.STATE_2_ZOOM_OUT,
       ExperienceState.STATE_3_SOFA_ADVENTURE,
       ExperienceState.STATE_4_HELPING_FRIEND,
+      ExperienceState.STATE_4B_RESCUED_REUNION,
       ExperienceState.STATE_5_FREE_PLAY,
       ExperienceState.STATE_6_RETURN_TO_ORB,
       ExperienceState.STATE_7_LUMORI_IDLING,

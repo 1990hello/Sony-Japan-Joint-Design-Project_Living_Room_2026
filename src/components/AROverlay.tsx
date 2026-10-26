@@ -45,17 +45,29 @@ export const AROverlay: React.FC<AROverlayProps> = ({
     if (state === ExperienceState.STATE_2F_SUCCESS) {
       return 'Success! The windmill spins smoothly and petals float through the air.';
     }
+    if (state === ExperienceState.STATE_2G_CLOSURE) {
+      return 'The windmill field is revived and flourishing.';
+    }
+    if (state === ExperienceState.STATE_2_ZOOM_OUT) {
+      return 'Camera zooms out as Sprout and Bellflower head to the sofa...';
+    }
     if (state === ExperienceState.STATE_2A_DISCOVERY) {
-      return 'A tiny Broken Windmill Field appears on the coffee table.';
+      return 'A tiny Broken Windmill Field appears on the coffee table (Camera zooms in).';
     }
     if (state === ExperienceState.STATE_2B_OBSERVATION) {
-      return 'The Lumori inspect the stalled windmill blades.';
+      return 'Sakura fetches tools from the crate while Sprout and Lotus inspect the axle.';
+    }
+    if (state === ExperienceState.STATE_3_SOFA_ADVENTURE) {
+      return 'Sprout jumps down to the cushion, but Bellflower slips into the cushion crevice!';
+    }
+    if (state === ExperienceState.STATE_4_HELPING_FRIEND) {
+      return 'Pinch or click Bellflower to pull him out, or let Sprout help autonomously!';
+    }
+    if (state === ExperienceState.STATE_4B_RESCUED_REUNION) {
+      return 'Bellflower is rescued! Both Lumori celebrate together.';
     }
     if (state === ExperienceState.STATE_5_FREE_PLAY) {
       return 'Pinch at the orb to call the Lumis home.';
-    }
-    if (state === ExperienceState.STATE_4_HELPING_FRIEND) {
-      return 'Pinch or click Bellflower Lumi to help pull him free!';
     }
     if (state === ExperienceState.STATE_0_DORMANT_ORB) {
       return 'Observe the Lumori orb resting on the shelf.';

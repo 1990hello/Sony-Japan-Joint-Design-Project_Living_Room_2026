@@ -22,8 +22,36 @@ export default function App() {
   const [showDebug, setShowDebug] = useState<boolean>(false);
   const [showStoryboard, setShowStoryboard] = useState<boolean>(false);
 
+  const [isWindmillRepaired, setIsWindmillRepaired] = useState<boolean>(false);
+
   const stateMachineRef = useRef<LumoriStateMachine | null>(null);
-  const autonomousTimerRef = useRef<number | null>(null);
+
+  // Latch windmill repaired state once interaction / repair succeeds, persisting across later room states
+  useEffect(() => {
+    if (
+      state === ExperienceState.STATE_2D_INTERACTION ||
+      state === ExperienceState.STATE_2E_AUTONOMOUS ||
+      state === ExperienceState.STATE_2F_SUCCESS ||
+      state === ExperienceState.STATE_2G_CLOSURE
+    ) {
+      setIsWindmillRepaired(true);
+    } else if (state === ExperienceState.STATE_0_DORMANT_ORB) {
+      setIsWindmillRepaired(false);
+    }
+
+    if (
+      state === ExperienceState.STATE_4B_RESCUED_REUNION ||
+      state === ExperienceState.STATE_5_FREE_PLAY
+    ) {
+      setMoriRescued(true);
+    } else if (
+      state === ExperienceState.STATE_0_DORMANT_ORB ||
+      state === ExperienceState.STATE_1_EMERGENCE ||
+      state === ExperienceState.STATE_3_SOFA_ADVENTURE
+    ) {
+      setMoriRescued(false);
+    }
+  }, [state]);
 
   // Trigger Return to Orb Command
   const handleTriggerReturnToOrb = useCallback(() => {
@@ -37,10 +65,6 @@ export default function App() {
     }
     soundEngine.playOrbResonance();
     soundEngine.playChirp('alert');
-    if (autonomousTimerRef.current) {
-      clearTimeout(autonomousTimerRef.current);
-      autonomousTimerRef.current = null;
-    }
     stateMachineRef.current?.transitionTo(ExperienceState.STATE_6_RETURN_TO_ORB);
   }, [state]);
 
@@ -53,21 +77,20 @@ export default function App() {
     ) {
       soundEngine.playChirp('happy');
       soundEngine.playWaterfallChime();
+      setIsWindmillRepaired(true);
       stateMachineRef.current?.transitionTo(ExperienceState.STATE_2D_INTERACTION);
     }
   }, [state]);
 
   // Handle Mori rescue (User-assisted or Autonomous)
+  // Advances directly to STATE_4B_RESCUED_REUNION which cleanly and automatically
+  // advances to STATE_5_FREE_PLAY via the State Machine's own timer.
   const handleRescueMori = useCallback(() => {
     if (moriRescued) return;
     setMoriRescued(true);
     soundEngine.playPop();
     soundEngine.playChirp('happy');
-
-    if (autonomousTimerRef.current) clearTimeout(autonomousTimerRef.current);
-    autonomousTimerRef.current = window.setTimeout(() => {
-      stateMachineRef.current?.transitionTo(ExperienceState.STATE_5_FREE_PLAY);
-    }, 2500);
+    stateMachineRef.current?.transitionTo(ExperienceState.STATE_4B_RESCUED_REUNION);
   }, [moriRescued]);
 
   // Unified Target Action Dispatcher (called by webcam pinch, mouse click, and debug tests)
@@ -112,7 +135,6 @@ export default function App() {
 
     return () => {
       sm.clearAllTimers();
-      if (autonomousTimerRef.current) clearTimeout(autonomousTimerRef.current);
     };
   }, []);
 
@@ -120,28 +142,6 @@ export default function App() {
   useEffect(() => {
     stateMachineRef.current?.setAutoTransitions(autoTransitions);
   }, [autoTransitions]);
-
-  // Manage Autonomous Timers for State 4 (Sofa rescue)
-  useEffect(() => {
-    if (!autoTransitions) return;
-
-    if (state === ExperienceState.STATE_4_HELPING_FRIEND && !moriRescued) {
-      autonomousTimerRef.current = window.setTimeout(() => {
-        handleRescueMori();
-      }, 5500);
-    }
-
-    if (state === ExperienceState.STATE_0_DORMANT_ORB || state === ExperienceState.STATE_1_EMERGENCE) {
-      setMoriRescued(false);
-    }
-
-    return () => {
-      if (autonomousTimerRef.current) {
-        clearTimeout(autonomousTimerRef.current);
-        autonomousTimerRef.current = null;
-      }
-    };
-  }, [state, autoTransitions, moriRescued, handleRescueMori]);
 
   // Free play cyclical autonomous antics timer
   useEffect(() => {
@@ -166,6 +166,7 @@ export default function App() {
 
   const handleReset = () => {
     setMoriRescued(false);
+    setIsWindmillRepaired(false);
     setFreePlayPhase(0);
     stateMachineRef.current?.reset();
   };
@@ -194,6 +195,7 @@ export default function App() {
         isPinching={trackingState.isPinching}
         isInsideOrb={trackingState.isInsideOrb}
         isNearWindmill={trackingState.isNearWindmill}
+        isWindmillRepaired={isWindmillRepaired}
         moriRescued={moriRescued}
         freePlayPhase={freePlayPhase}
         onOrbClick={handleTriggerReturnToOrb}

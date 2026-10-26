@@ -34,28 +34,37 @@ The four authentic Lumori characters faithfully implemented in the application:
 
 The coffee table activity faithfully implements the 6 storyboard stages via deterministic sub-states:
 
-- **State 2A — Discovery**: A miniature field with rustic wooden windmill appears on the coffee table. The 4 Lumori gather around the broken, stalled windmill.
-- **State 2B — Observation**: The Lumori inspect the stalled blades. Sprout inspects the axle from the upper platform; Bellflower tries to push the lower blade; Lotus inspects the base cog with a small wrench; Sakura holds a toolbox looking anxious.
-- **State 2C — Invitation**: The Lumori gesture toward the user inviting help. A subtle visual cue appears (blowing breath icon, waving hand icon, rotating arrow ring around the hub).
+- **State 2A — Discovery**: A miniature field with rustic wooden windmill appears on the coffee table. The camera smoothly zooms in (2.05x) to frame the coffee table diorama.
+- **State 2B — Observation**: The Lumori inspect the stalled blades. Sakura walks over to the wooden crate, inspects the tools, and brings a small wrench to Lotus at the base cog while Sprout inspects the axle.
+- **State 2C — Invitation**: The Lumori gesture toward the user inviting help. A subtle visual cue appears (blowing breath icon, rotating arrow ring around the hub).
 - **State 2D — User Interaction**: The user assists by waving, performing a pinch gesture near the windmill, or clicking the windmill. The blades catch the breeze and accelerate.
 - **State 2E — Autonomous Solution**: If the user chooses not to interact within 6.5s, the Lumori coordinate their efforts (tapping the cog and pushing the blades in unison) to unlock the mechanism autonomously.
 - **State 2F — Success**: The windmill spins smoothly with a golden blur. Glowing flower petals and pollen drift into the air; all four Lumori cheer, jump, and celebrate (`♫`, `♥`, `^.^`).
-- **State 2G — Closure**: The activity gradually settles. The Lumori rest contentedly near the working windmill before moving toward the sofa.
+- **State 2G — Closure**: The activity gradually settles. The Lumori rest contentedly near the working windmill.
+- **State 2_ZOOM_OUT — Camera Zoom Out**: The camera smoothly pulls back (1.4s ease-in-out) from 2.05x to 1.0x to frame the full living room before the sofa adventure begins.
 
 ---
 
-## 🛠️ Key Bug Fixes & Improvements
+## 🛠️ Key Bug Fixes & Architectural Improvements
 
-1. **Deterministic Lumi Spawning & Emergence**:
-   - **Root Cause**: `WindmillField.tsx` was rendering the 4 Lumori unconditionally without checking `isWindmillState(state)`.
-   - **Fix**: Gated field Lumis strictly on `isWindmillState(state)`. In State 0, all Lumis reside inside the Orb (zero Lumis outside). In State 1, Lumis visibly step out of the orb aperture onto the floating shelf, greet each other, and travel down to the coffee table.
-2. **Robust Hand Tracking & Pinch Pipeline**:
-   - **Root Cause**: Stale React closures inside `useHandTracking.ts` captured initial `state = 0`, hardcoded percentage coordinate bounds, and no separate release hysteresis.
-   - **Fix**: Rewrote `useHandTracking.ts` with `useRef` stale-closure protection, pixel-accurate DOM bounding boxes (`lumori-orb-target`, `lumori-windmill-target`, `lumori-sofa-rescue-target`), EMA coordinate smoothing, dual hysteresis thresholds (`PINCH_START = 0.075`, `PINCH_RELEASE = 0.098`), and unified action dispatcher connected to mouse and webcam identically.
-3. **Bright Scandinavian Living Room Aesthetic**:
-   - Warm ivory/off-white walls, pale natural oak flooring, light Scandinavian birch shelf, bleached oak coffee table, and soft oatmeal linen sofa with soft daylight sunbeams.
-4. **Interactive 4-Step Pipeline Debug Panel**:
-   - Live telemetry showing Hand Detection, Pinch Detection, Target Identification, and Action Execution with a "Simulate Pinch on Target" button.
+1. **Deterministic Sofa Rescue State Machine Progression**:
+   - **Root Cause**: The rescue handler set `moriRescued = true`, which re-rendered the parent component and triggered the cleanup function of the component's `useEffect`, cancelling the timeout before it could fire.
+   - **Fix**: Separated rescue into explicit phases: `STATE_4_HELPING_FRIEND` $\rightarrow$ `STATE_4B_RESCUED_REUNION` $\rightarrow$ `STATE_5_FREE_PLAY`. Handled automatically within the deterministic `LumoriStateMachine` with its own un-cancelled class timer (`addTimer`). No extra pinch or click is required after rescue.
+2. **Smooth Camera Zoom-In & Zoom-Out**:
+   - During Broken Windmill Field states (2A–2G), the scene smoothly scales by 2.05x centered on the coffee table (`38% 74%`).
+   - In `STATE_2_ZOOM_OUT`, it smoothly animates back to 1.0x over 1.4 seconds before Sprout and Bellflower head to the sofa.
+3. **Furniture Color Tuning (Sofa & Coffee Table Only)**:
+   - **Sofa**: Darkened to medium warm taupe / greige (`#8C7D70`–`#6E6156`) with distinct seat cushions and a defined crevice.
+   - **Coffee Table**: Darkened to rich medium walnut / smoked-oak (`#6D5340`–`#4A3425`) with subtle warm amber grain highlights.
+   - **Walls, Floor & Shelf**: Preserved bright, warm Scandinavian cream and blond oak tones.
+4. **Windmill Blade Pivot Alignment & Persistent Rotation**:
+   - Concentric axle pivot: Aligned rotating container and center hub inside a zero-size centered flex container at `(0, 0)` origin, eliminating pivot drift.
+   - Persistent rotation: Windmill blades continue rotating smoothly in the background through States 3, 4, 4B, 5, 6, and 7 once repaired.
+5. **Corrected Sofa Jump Trajectory & Crevice Position**:
+   - Sprout jumps from headrest down onto the left seat cushion (`top: 71.5%`, `left: 69%`).
+   - Bellflower follows Sprout's jump and slips directly into the gap between the seat cushions (`top: 73.5%`, `left: 76.8%`) with feet dangling/kicking until rescued.
+6. **Robust Hand Tracking & Pinch Pipeline**:
+   - Stale-closure protection, pixel-accurate DOM bounding boxes (`lumori-orb-target`, `lumori-windmill-target`, `lumori-sofa-rescue-target`), EMA coordinate smoothing, dual hysteresis thresholds, and unified action dispatcher connected to mouse and webcam identically.
 
 ---
 
@@ -63,10 +72,14 @@ The coffee table activity faithfully implements the 6 storyboard stages via dete
 
 - **0. Dormant Orb**: Orb rests calmly on shelf; subtle lights and silhouettes inside Lumori. Zero Lumis outside.
 - **1. Emergence**: Lumori visibly step out of the orb onto the shelf, greet each other, and walk down to the living room.
-- **2. Broken Windmill Field**: Sub-states 2A–2G as described above.
-- **3. Sofa Adventure**: Sprout Lumi bounds onto sofa headrest and cushion; Bellflower copies the jump and slips comically into the cushion gap with feet kicking!
-- **4. Helping a Friend**: User can pinch/click Bellflower to help pull free, or Sprout braces and heaves him out after 5.5s.
-- **5. Free Play**: Joyful autonomous play around the sofa.
+- **2A–2G. Broken Windmill Field (Zoomed In)**: Interactive diorama on coffee table with tool search, cooperative repair, and continuous blade rotation.
+- **2_ZOOM_OUT. Camera Zoom Out**: Smooth 1.4s camera pull-back to full living room framing.
+- **3. Sofa Adventure**: Sprout lands on the seat cushion; Bellflower follows and falls into the seat cushion crevice with kicking feet!
+- **4. Helping a Friend**: User can pinch/click Bellflower to help pull free, or Sprout helps autonomously after 6s.
+- **4B. Rescued Reunion**: Bellflower is free on the seat cushion; both Lumori celebrate together with hearts and sparkles before auto-advancing to Free Play.
+- **5. Free Play**: Joyful autonomous antics around the sofa cushions and armrest.
+- **6. Return to Orb**: Triggered at any time by pinching at the orb or clicking the orb. Lumori sprint back to the shelf and climb inside.
+- **7. Lumori Idling**: Persistent living decoration inside the orb. Lumori rest and explore miniature Lumori. They do not auto-emerge again.
 - **6. Return to Orb**: Triggered at any time by pinching at the orb or clicking the orb. Lumori sprint back to the shelf and climb inside.
 - **7. Lumori Idling**: Persistent living decoration inside the orb. Lumori rest and explore miniature Lumori. They do not auto-emerge again.
 
