@@ -10,8 +10,12 @@ export enum ExperienceState {
   STATE_2F_SUCCESS = 25,
   STATE_2G_CLOSURE = 26,
   STATE_2_ZOOM_OUT = 27,
-  // Sofa States
+  // Sofa States (Explicit 7-step sequence)
   STATE_3_SOFA_ADVENTURE = 3,
+  STATE_3A_SPROUT_HEADREST = 30,
+  STATE_3B_SPROUT_JUMP = 31,
+  STATE_3C_BELLFLOWER_HEADREST = 32,
+  STATE_3D_BELLFLOWER_JUMP_TRAPPED = 33,
   STATE_4_HELPING_FRIEND = 4,
   STATE_4B_RESCUED_REUNION = 41,
   // Remaining States
@@ -93,8 +97,32 @@ export const STATE_METAS: Record<ExperienceState, StateMeta> = {
   [ExperienceState.STATE_3_SOFA_ADVENTURE]: {
     id: ExperienceState.STATE_3_SOFA_ADVENTURE,
     name: "3 — Sofa Adventure",
-    shortDesc: "Sprout jumps to seat cushion; Bellflower lands in seat gap!",
-    userHint: "Bellflower Lumi got stuck in the seat cushion gap!",
+    shortDesc: "Sprout and Bellflower head to the sofa to explore.",
+    userHint: "Watch the Lumori explore the sofa...",
+  },
+  [ExperienceState.STATE_3A_SPROUT_HEADREST]: {
+    id: ExperienceState.STATE_3A_SPROUT_HEADREST,
+    name: "3A — Sprout on Headrest",
+    shortDesc: "Sprout perches on top of the sofa headrest, looking down.",
+    userHint: "Sprout is preparing to jump down from the headrest.",
+  },
+  [ExperienceState.STATE_3B_SPROUT_JUMP]: {
+    id: ExperienceState.STATE_3B_SPROUT_JUMP,
+    name: "3B — Sprout Jumps to Cushion",
+    shortDesc: "Sprout leaps down from the headrest onto the seat cushion.",
+    userHint: "Sprout lands safely on the cushion and calls Bellflower!",
+  },
+  [ExperienceState.STATE_3C_BELLFLOWER_HEADREST]: {
+    id: ExperienceState.STATE_3C_BELLFLOWER_HEADREST,
+    name: "3C — Bellflower on Headrest",
+    shortDesc: "Bellflower hops onto the headrest, gearing up to copy the jump.",
+    userHint: "Bellflower reaches the headrest and prepares to jump.",
+  },
+  [ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED]: {
+    id: ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED,
+    name: "3D — Bellflower Jumps & Trapped",
+    shortDesc: "Bellflower leaps, slips, and lands trapped in the seat gap!",
+    userHint: "Oh no! Bellflower got stuck between the seat cushions!",
   },
   [ExperienceState.STATE_4_HELPING_FRIEND]: {
     id: ExperienceState.STATE_4_HELPING_FRIEND,
@@ -207,5 +235,15 @@ export function isWindmillZoomed(state: ExperienceState): boolean {
     state === ExperienceState.STATE_2E_AUTONOMOUS ||
     state === ExperienceState.STATE_2F_SUCCESS ||
     state === ExperienceState.STATE_2G_CLOSURE
+  );
+}
+
+export function isSofaSequenceState(state: ExperienceState): boolean {
+  return (
+    state === ExperienceState.STATE_3_SOFA_ADVENTURE ||
+    state === ExperienceState.STATE_3A_SPROUT_HEADREST ||
+    state === ExperienceState.STATE_3B_SPROUT_JUMP ||
+    state === ExperienceState.STATE_3C_BELLFLOWER_HEADREST ||
+    state === ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED
   );
 }

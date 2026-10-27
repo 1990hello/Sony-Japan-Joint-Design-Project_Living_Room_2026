@@ -129,18 +129,134 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
       }
     }
 
-    // State 3: Sofa Adventure - Jump and stuck in seat-cushion crevice
-    if (state === ExperienceState.STATE_3_SOFA_ADVENTURE) {
+    // State 2 Zoom Out: Lumis admiring windmill on table as camera zooms out to full room framing
+    if (state === ExperienceState.STATE_2_ZOOM_OUT) {
       return (
         <>
-          {/* Sprout Lumi landed safely on left seat cushion looking over with surprise */}
+          <div
+            className="absolute z-20 transition-all duration-700 ease-out"
+            style={{ left: '42%', top: '65%' }}
+          >
+            <Lumi type="sprout" mood="happy" size={50} emote="^.^" />
+          </div>
+          <div
+            className="absolute z-20 transition-all duration-700 ease-out"
+            style={{ left: '50%', top: '66%' }}
+          >
+            <Lumi type="bellflower" mood="happy" size={48} emote="♥" />
+          </div>
+          <div className="absolute z-15" style={{ left: '28%', top: '64%' }}>
+            <Lumi type="sakura" size={42} mood="resting" emote="♥" />
+          </div>
+          <div className="absolute z-15" style={{ left: '48%', top: '65%' }}>
+            <Lumi type="lotus" size={42} mood="resting" />
+          </div>
+        </>
+      );
+    }
+
+    // State 3A: First Lumi (Sprout) reaches the sofa headrest with clear starting pose
+    if (state === ExperienceState.STATE_3A_SPROUT_HEADREST) {
+      return (
+        <>
+          {/* Sprout Lumi standing proud on the sofa headrest, looking down */}
+          <div
+            className="absolute z-25 transition-all duration-700 ease-out"
+            style={{ left: '71%', top: '53%' }}
+          >
+            <Lumi type="sprout" mood="curious" size={54} emote="^.^" />
+          </div>
+          {/* Bellflower Lumi approaching the sofa, looking up at Sprout */}
+          <div
+            className="absolute z-20 transition-all duration-700 ease-out"
+            style={{ left: '62%', top: '72%' }}
+          >
+            <Lumi type="bellflower" mood="curious" size={48} emote="?" />
+          </div>
+          {/* Sakura & Lotus resting contentedly on coffee table beside the spinning mill */}
+          <div className="absolute z-15" style={{ left: '28%', top: '64%' }}>
+            <Lumi type="sakura" size={42} mood="resting" emote="♥" />
+          </div>
+          <div className="absolute z-15" style={{ left: '48%', top: '65%' }}>
+            <Lumi type="lotus" size={42} mood="resting" />
+          </div>
+        </>
+      );
+    }
+
+    // State 3B: Sprout visibly jumps down from headrest onto the seat cushion & settles
+    if (state === ExperienceState.STATE_3B_SPROUT_JUMP) {
+      return (
+        <>
+          {/* Sprout Lumi has leaped down onto left seat cushion, landing and settling */}
+          <div
+            className="absolute z-20 transition-all duration-800 ease-out"
+            style={{ left: '69%', top: '71.5%' }}
+          >
+            <Lumi type="sprout" mood="happy" size={54} emote="^.^" />
+          </div>
+          {/* Bellflower Lumi at base of sofa, watching Sprout with admiration */}
+          <div
+            className="absolute z-20 transition-all duration-700 ease-out"
+            style={{ left: '64%', top: '71.5%' }}
+          >
+            <Lumi type="bellflower" mood="playful" size={48} emote="!" />
+          </div>
+          {/* Sakura & Lotus on coffee table */}
+          <div className="absolute z-15" style={{ left: '28%', top: '64%' }}>
+            <Lumi type="sakura" size={42} mood="resting" emote="♥" />
+          </div>
+          <div className="absolute z-15" style={{ left: '48%', top: '65%' }}>
+            <Lumi type="lotus" size={42} mood="resting" />
+          </div>
+        </>
+      );
+    }
+
+    // State 3C: Second Lumi (Bellflower) reaches the sofa headrest with clear starting pose
+    if (state === ExperienceState.STATE_3C_BELLFLOWER_HEADREST) {
+      return (
+        <>
+          {/* Sprout Lumi sitting safely on left seat cushion cheering Bellflower on */}
           <div
             className="absolute z-20 transition-all duration-700 ease-out"
             style={{ left: '69%', top: '71.5%' }}
           >
-            <Lumi type="sprout" mood="curious" size={54} emote="O.O" />
+            <Lumi type="sprout" mood="happy" size={54} emote="♫" />
           </div>
-          {/* Bellflower Lumi jumped from headrest and fell stuck in the seat-cushion crevice! */}
+          {/* Bellflower Lumi standing upright on headrest, waving ears, ready to jump */}
+          <div
+            className="absolute z-25 transition-all duration-700 ease-out"
+            style={{ left: '76.8%', top: '53%' }}
+          >
+            <Lumi type="bellflower" mood="playful" size={50} isStuck={false} emote="!" />
+          </div>
+          {/* Sakura & Lotus on coffee table */}
+          <div className="absolute z-15" style={{ left: '28%', top: '64%' }}>
+            <Lumi type="sakura" size={42} mood="resting" emote="♥" />
+          </div>
+          <div className="absolute z-15" style={{ left: '48%', top: '65%' }}>
+            <Lumi type="lotus" size={42} mood="resting" />
+          </div>
+        </>
+      );
+    }
+
+    // State 3D (and fallback STATE_3): Bellflower jumps down, slips into seat cushion gap & becomes trapped
+    if (
+      state === ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED ||
+      state === ExperienceState.STATE_3_SOFA_ADVENTURE
+    ) {
+      return (
+        <>
+          {/* Sprout Lumi looking over with shock/concern */}
+          <div
+            className="absolute z-20 transition-all duration-700 ease-out"
+            style={{ left: '69%', top: '71.5%' }}
+          >
+            <Lumi type="sprout" mood="concerned" size={54} emote="O.O" />
+          </div>
+          {/* Bellflower Lumi lodged upside-down between seat cushions with kicking feet */}
           <div
             className="absolute z-20 transition-all duration-700 ease-out cursor-pointer"
             style={{ left: '76.8%', top: '73.5%' }}
@@ -152,7 +268,7 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
           >
             <Lumi type="bellflower" size={50} isStuck={true} emote="!" />
           </div>
-          {/* Sakura & Lotus resting contentedly on the coffee table beside the spinning mill */}
+          {/* Sakura & Lotus on coffee table */}
           <div className="absolute z-15" style={{ left: '28%', top: '64%' }}>
             <Lumi type="sakura" size={42} mood="resting" emote="♥" />
           </div>
@@ -409,6 +525,7 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
               <WindmillField
                 state={state}
                 isNearWindmill={isNearWindmill}
+                isPinching={isPinching}
                 isWindmillRepaired={isWindmillRepaired}
                 onUserInteract={onWindmillInteract}
               />
@@ -422,7 +539,7 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
 
         {/* ---------------- FURNITURE 3: MEDIUM WARM TAUPE / GREIGE SOFA ---------------- */}
         <div className="absolute right-[6%] bottom-[12%] z-10">
-          <div className="relative w-[380px] h-[220px]">
+          <div id="lumori-sofa-target" className="relative w-[380px] h-[220px]">
             {/* Soft Ambient Floor Shadow */}
             <div className="absolute -bottom-4 inset-x-4 h-9 bg-stone-700/20 blur-xl rounded-full" />
 
@@ -455,7 +572,13 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
                 title="Cushion crevice - Help Bellflower!"
               >
                 {state === ExperienceState.STATE_4_HELPING_FRIEND && !moriRescued && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-cyan-400/40 blur-[2px] animate-pulse pointer-events-none" />
+                  <div
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full blur-[2px] transition-all duration-200 pointer-events-none ${
+                      isPinching
+                        ? 'bg-amber-400/50 scale-110 shadow-[0_0_12px_#fbbf24]'
+                        : 'bg-cyan-400/40 animate-pulse shadow-[0_0_8px_#38bdf8]'
+                    }`}
+                  />
                 )}
               </div>
 

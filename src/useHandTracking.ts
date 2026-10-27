@@ -40,6 +40,7 @@ export function useHandTracking({
 
   // Gesture state management
   const isPinchingRef = useRef<boolean>(false);
+  const isMouseDownRef = useRef<boolean>(false);
   const consecutivePinchFramesRef = useRef<number>(0);
   const hasTriggeredCurrentPinchRef = useRef<boolean>(false);
   const lastActionTimeRef = useRef<number>(0);
@@ -73,12 +74,12 @@ export function useHandTracking({
       }
     }
 
-    // 2. Check Windmill Target (Only valid during windmill states)
+    // 2. Check Windmill Target (Valid during all windmill states)
     const windmillEl = document.getElementById('lumori-windmill-target');
     let isWindmill = false;
     if (windmillEl && isWindmillState(currentState)) {
       const rect = windmillEl.getBoundingClientRect();
-      const margin = 24;
+      const margin = 28;
       if (
         clientX >= rect.left - margin &&
         clientX <= rect.right + margin &&
@@ -89,19 +90,34 @@ export function useHandTracking({
       }
     }
 
-    // 3. Check Sofa Rescue Target (Only valid in State 4 Helping a Friend)
+    // 3. Check Sofa Rescue Target (Valid in State 4 Helping a Friend)
     const sofaRescueEl = document.getElementById('lumori-sofa-rescue-target');
+    const sofaEl = document.getElementById('lumori-sofa-target');
     let isSofaRescue = false;
-    if (sofaRescueEl && currentState === ExperienceState.STATE_4_HELPING_FRIEND) {
-      const rect = sofaRescueEl.getBoundingClientRect();
-      const margin = 32;
-      if (
-        clientX >= rect.left - margin &&
-        clientX <= rect.right + margin &&
-        clientY >= rect.top - margin &&
-        clientY <= rect.bottom + margin
-      ) {
-        isSofaRescue = true;
+    if (currentState === ExperienceState.STATE_4_HELPING_FRIEND) {
+      if (sofaRescueEl) {
+        const rect = sofaRescueEl.getBoundingClientRect();
+        const margin = 36;
+        if (
+          clientX >= rect.left - margin &&
+          clientX <= rect.right + margin &&
+          clientY >= rect.top - margin &&
+          clientY <= rect.bottom + margin
+        ) {
+          isSofaRescue = true;
+        }
+      }
+      // Also hit-test the sofa cushion area where Bellflower is stuck
+      if (!isSofaRescue && sofaEl) {
+        const rect = sofaEl.getBoundingClientRect();
+        if (
+          clientX >= rect.left + rect.width * 0.35 &&
+          clientX <= rect.right + 20 &&
+          clientY >= rect.top + rect.height * 0.35 &&
+          clientY <= rect.bottom + 20
+        ) {
+          isSofaRescue = true;
+        }
       }
     }
 
@@ -162,6 +178,7 @@ export function useHandTracking({
 
       setTrackingState((prev) => ({
         ...prev,
+        isPinching: isPinchingRef.current || isMouseDownRef.current,
         pinchX: normX,
         pinchY: normY,
         isInsideOrb: isOrb,
@@ -179,6 +196,9 @@ export function useHandTracking({
       const clientX = e.clientX;
       const clientY = e.clientY;
       const { target, isHit, isOrb, isWindmill } = identifyInteractionTarget(clientX, clientY);
+
+      isMouseDownRef.current = true;
+      isPinchingRef.current = true;
 
       setTrackingState((prev) => ({
         ...prev,
@@ -199,6 +219,8 @@ export function useHandTracking({
     };
 
     const handleMouseUp = () => {
+      isMouseDownRef.current = false;
+      isPinchingRef.current = false;
       setTrackingState((prev) => ({
         ...prev,
         isPinching: false,
@@ -473,6 +495,7 @@ export function useHandTracking({
 
             setTrackingState((prev) => ({
               ...prev,
+              isPinching: isPinchingRef.current || isMouseDownRef.current,
               pinchX: smoothedXRef.current,
               pinchY: smoothedYRef.current,
               isInsideOrb: isOrb,

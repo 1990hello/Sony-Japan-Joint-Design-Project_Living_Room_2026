@@ -188,3 +188,32 @@
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
+
+/* Concentric Windmill Blade Assembly Rotation */
+@keyframes windmillRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.windmill-blade-group {
+  transform-origin: 0px 0px;
+  transform-box: view-box;
+  will-change: transform;
+}
+
+.windmill-blade-group.spinning {
+  animation: windmillRotate 1.8s linear infinite;
+}
+
+.windmill-blade-group.accelerating {
+  animation: windmillRotate 4.5s linear infinite;
+}
+
+.windmill-blade-group.stopped {
+  transform: rotate(12deg);
+  transition: transform 0.6s ease-out;
+}

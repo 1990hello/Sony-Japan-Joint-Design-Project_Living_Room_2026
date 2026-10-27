@@ -57,8 +57,20 @@ export const AROverlay: React.FC<AROverlayProps> = ({
     if (state === ExperienceState.STATE_2B_OBSERVATION) {
       return 'Sakura fetches tools from the crate while Sprout and Lotus inspect the axle.';
     }
+    if (state === ExperienceState.STATE_3A_SPROUT_HEADREST) {
+      return 'Sprout perches on the sofa headrest, preparing to jump down...';
+    }
+    if (state === ExperienceState.STATE_3B_SPROUT_JUMP) {
+      return 'Sprout leaps onto the seat cushion and calls Bellflower!';
+    }
+    if (state === ExperienceState.STATE_3C_BELLFLOWER_HEADREST) {
+      return 'Bellflower hops onto the headrest preparing to follow...';
+    }
+    if (state === ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED) {
+      return 'Bellflower leaps down, slips, and becomes trapped between the cushions!';
+    }
     if (state === ExperienceState.STATE_3_SOFA_ADVENTURE) {
-      return 'Sprout jumps down to the cushion, but Bellflower slips into the cushion crevice!';
+      return 'The Lumori explore the sofa...';
     }
     if (state === ExperienceState.STATE_4_HELPING_FRIEND) {
       return 'Pinch or click Bellflower to pull him out, or let Sprout help autonomously!';
@@ -204,22 +216,23 @@ export const AROverlay: React.FC<AROverlayProps> = ({
           </div>
         )}
 
+        {/* Cursor Reticle Ring - White (idle), Blue (hover), Orange (pinch) */}
         <div
           className={`rounded-full border-2 transition-all duration-150 flex items-center justify-center ${
             tracking.isPinching
-              ? 'w-7 h-7 border-amber-400 bg-amber-400/40 scale-95 shadow-[0_0_14px_#fbbf24]'
+              ? 'w-7 h-7 border-amber-400 bg-amber-400/50 scale-95 shadow-[0_0_18px_#fbbf24]'
               : tracking.isTargetHit
-              ? 'w-11 h-11 border-cyan-400 bg-cyan-400/20 scale-110 shadow-[0_0_12px_#38bdf8]'
-              : 'w-8 h-8 border-slate-700/80 bg-white/40 shadow-sm'
+              ? 'w-11 h-11 border-cyan-400 bg-cyan-400/20 scale-110 shadow-[0_0_14px_#38bdf8]'
+              : 'w-8 h-8 border-slate-300/90 bg-white/60 shadow-md'
           }`}
         >
           <div
             className={`rounded-full transition-all duration-150 ${
               tracking.isPinching
-                ? 'w-2.5 h-2.5 bg-amber-400'
+                ? 'w-2.5 h-2.5 bg-amber-400 shadow-[0_0_8px_#fbbf24]'
                 : tracking.isTargetHit
                 ? 'w-2 h-2 bg-cyan-300'
-                : 'w-1.5 h-1.5 bg-slate-800'
+                : 'w-1.5 h-1.5 bg-slate-700'
             }`}
           />
         </div>

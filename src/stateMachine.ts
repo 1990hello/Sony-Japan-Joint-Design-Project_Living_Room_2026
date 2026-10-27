@@ -47,6 +47,7 @@ export class LumoriStateMachine {
   public transitionTo(nextState: ExperienceState) {
     this.clearAllTimers();
     this.currentState = nextState;
+    console.log(`[Lumori StateMachine] Transitioned to: ${ExperienceState[nextState] || nextState}`);
     this.config.onStateChange(nextState);
     this.onEnterState(nextState);
   }
@@ -146,35 +147,70 @@ export class LumoriStateMachine {
         break;
 
       case ExperienceState.STATE_2_ZOOM_OUT:
-        // Camera smoothly zooms out to original full room perspective (1.5s)
-        // Windmill remains spinning continuously!
+        // Camera smoothly zooms out to original full room perspective (1.4s)
+        // Ensure camera transition finishes completely (2000ms) before starting sofa sequence!
         if (this.config.autoTransitions) {
           this.addTimer(() => {
             this.config.onPlayChirp('curious');
-            this.transitionTo(ExperienceState.STATE_3_SOFA_ADVENTURE);
-          }, 2200);
+            this.transitionTo(ExperienceState.STATE_3A_SPROUT_HEADREST);
+          }, 2000);
         }
         break;
 
-      // ---------------- SOFA SEQUENCE & RESCUE TRANSITION ----------------
+      // ---------------- SOFA SEQUENCE (EXPLICIT JUMP & TRAPPED STATES) ----------------
       case ExperienceState.STATE_3_SOFA_ADVENTURE:
-        // Sprout jumps to seat cushion; Bellflower copies and slips into seat cushion gap!
+        // Redirect to Step 3A if triggered directly
+        this.transitionTo(ExperienceState.STATE_3A_SPROUT_HEADREST);
+        break;
+
+      case ExperienceState.STATE_3A_SPROUT_HEADREST:
+        // Step 3: First Lumi (Sprout) reaches the sofa headrest with clear starting pose
+        this.config.onPlayChirp('curious');
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_3B_SPROUT_JUMP);
+          }, 1600);
+        }
+        break;
+
+      case ExperienceState.STATE_3B_SPROUT_JUMP:
+        // Step 4: Sprout visibly jumps down from headrest onto the seat cushion & settles
+        this.config.onPlayChirp('happy');
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_3C_BELLFLOWER_HEADREST);
+          }, 1800);
+        }
+        break;
+
+      case ExperienceState.STATE_3C_BELLFLOWER_HEADREST:
+        // Step 5: Second Lumi (Bellflower) hops onto the headrest with clear starting pose
+        this.config.onPlayChirp('greet');
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED);
+          }, 1600);
+        }
+        break;
+
+      case ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED:
+        // Step 6: Bellflower jumps forward & down, slipping head-first into cushion crevice!
         this.config.onPlayChirp('alert');
         if (this.config.autoTransitions) {
           this.addTimer(() => {
             this.transitionTo(ExperienceState.STATE_4_HELPING_FRIEND);
-          }, 3600);
+          }, 2000);
         }
         break;
 
       case ExperienceState.STATE_4_HELPING_FRIEND:
+        // Step 7: Rescue - Sprout tries to pull Bellflower free; user can pinch or click
         this.config.onPlayChirp('curious');
-        // Autonomous rescue timer fallback if user does not click/pinch to help:
         if (this.config.autoTransitions) {
           this.addTimer(() => {
             this.config.onPlayPop();
             this.transitionTo(ExperienceState.STATE_4B_RESCUED_REUNION);
-          }, 5500);
+          }, 6000);
         }
         break;
 
@@ -224,7 +260,10 @@ export class LumoriStateMachine {
       ExperienceState.STATE_2F_SUCCESS,
       ExperienceState.STATE_2G_CLOSURE,
       ExperienceState.STATE_2_ZOOM_OUT,
-      ExperienceState.STATE_3_SOFA_ADVENTURE,
+      ExperienceState.STATE_3A_SPROUT_HEADREST,
+      ExperienceState.STATE_3B_SPROUT_JUMP,
+      ExperienceState.STATE_3C_BELLFLOWER_HEADREST,
+      ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED,
       ExperienceState.STATE_4_HELPING_FRIEND,
       ExperienceState.STATE_4B_RESCUED_REUNION,
       ExperienceState.STATE_5_FREE_PLAY,

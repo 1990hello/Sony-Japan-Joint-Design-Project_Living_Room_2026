@@ -47,7 +47,11 @@ export default function App() {
     } else if (
       state === ExperienceState.STATE_0_DORMANT_ORB ||
       state === ExperienceState.STATE_1_EMERGENCE ||
-      state === ExperienceState.STATE_3_SOFA_ADVENTURE
+      state === ExperienceState.STATE_3_SOFA_ADVENTURE ||
+      state === ExperienceState.STATE_3A_SPROUT_HEADREST ||
+      state === ExperienceState.STATE_3B_SPROUT_JUMP ||
+      state === ExperienceState.STATE_3C_BELLFLOWER_HEADREST ||
+      state === ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED
     ) {
       setMoriRescued(false);
     }

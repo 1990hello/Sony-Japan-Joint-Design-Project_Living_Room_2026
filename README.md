@@ -47,24 +47,31 @@ The coffee table activity faithfully implements the 6 storyboard stages via dete
 
 ## 🛠️ Key Bug Fixes & Architectural Improvements
 
-1. **Deterministic Sofa Rescue State Machine Progression**:
-   - **Root Cause**: The rescue handler set `moriRescued = true`, which re-rendered the parent component and triggered the cleanup function of the component's `useEffect`, cancelling the timeout before it could fire.
-   - **Fix**: Separated rescue into explicit phases: `STATE_4_HELPING_FRIEND` $\rightarrow$ `STATE_4B_RESCUED_REUNION` $\rightarrow$ `STATE_5_FREE_PLAY`. Handled automatically within the deterministic `LumoriStateMachine` with its own un-cancelled class timer (`addTimer`). No extra pinch or click is required after rescue.
-2. **Smooth Camera Zoom-In & Zoom-Out**:
-   - During Broken Windmill Field states (2A–2G), the scene smoothly scales by 2.05x centered on the coffee table (`38% 74%`).
-   - In `STATE_2_ZOOM_OUT`, it smoothly animates back to 1.0x over 1.4 seconds before Sprout and Bellflower head to the sofa.
-3. **Furniture Color Tuning (Sofa & Coffee Table Only)**:
-   - **Sofa**: Darkened to medium warm taupe / greige (`#8C7D70`–`#6E6156`) with distinct seat cushions and a defined crevice.
-   - **Coffee Table**: Darkened to rich medium walnut / smoked-oak (`#6D5340`–`#4A3425`) with subtle warm amber grain highlights.
-   - **Walls, Floor & Shelf**: Preserved bright, warm Scandinavian cream and blond oak tones.
-4. **Windmill Blade Pivot Alignment & Persistent Rotation**:
-   - Concentric axle pivot: Aligned rotating container and center hub inside a zero-size centered flex container at `(0, 0)` origin, eliminating pivot drift.
-   - Persistent rotation: Windmill blades continue rotating smoothly in the background through States 3, 4, 4B, 5, 6, and 7 once repaired.
-5. **Corrected Sofa Jump Trajectory & Crevice Position**:
-   - Sprout jumps from headrest down onto the left seat cushion (`top: 71.5%`, `left: 69%`).
-   - Bellflower follows Sprout's jump and slips directly into the gap between the seat cushions (`top: 73.5%`, `left: 76.8%`) with feet dangling/kicking until rescued.
-6. **Robust Hand Tracking & Pinch Pipeline**:
-   - Stale-closure protection, pixel-accurate DOM bounding boxes (`lumori-orb-target`, `lumori-windmill-target`, `lumori-sofa-rescue-target`), EMA coordinate smoothing, dual hysteresis thresholds, and unified action dispatcher connected to mouse and webcam identically.
+1. **Windmill Blades Restored with Single Parent Rotation Group**:
+   - **Root Cause**: The blades were wrapped inside a zero-dimension flex container (`w-0 h-0 flex`) with uncontrolled flex-shrink and viewBox offsets, causing the blade container to collapse or clip in certain render states.
+   - **Fix**: Re-architected the blade assembly to use a single parent group `<g className="windmill-blade-group ...">` inside a properly sized SVG positioned at the hub axle `(left: 50%, top: 100%)`.
+   - **Pivot & Centering**: The center axle hub cap is located at `(0, 0)` within the exact same SVG coordinate space, with CSS `transform-origin: 0px 0px; transform-box: view-box;`.
+   - **Permanent Rotation**: The rotation animation runs on pure CSS keyframes (`windmillRotate 1.8s linear infinite`), persisting seamlessly through camera zoom-out, sofa adventure, Free Play, and return-to-orb states without resetting on React re-renders.
+
+2. **Consistent Cursor Visual Feedback (White → Blue → Orange)**:
+   - **Root Cause**: Mousemove and frame update loops were calling `setTrackingState` without explicitly carrying forward `isPinching: isPinchingRef.current || isMouseDownRef.current`, causing hover updates to occasionally overwrite the orange pinch state back to blue.
+   - **Fix**: Decoupled hover and pinch presentation. The cursor reticle explicitly checks:
+     - **White**: Normal state; no interactive target hovered.
+     - **Blue**: Hovering over interactive target (`isTargetHit && !isPinching`).
+     - **Orange**: Active pinch detected (`isPinching`), whether over the orb, windmill, sofa, or general room.
+   - Added `isMouseDownRef` tracking to guarantee that hover updates never overwrite active pinch feedback. Also added synchronized hover/pinch feedback rings on the windmill and sofa target crevice.
+
+3. **Step-by-Step Camera-to-Sofa Jump Sequence**:
+   - **Root Cause**: `STATE_3_SOFA_ADVENTURE` was previously rendering Bellflower immediately in the trapped position, skipping the intermediate jump animations.
+   - **Fix**: Structured the sofa sequence into explicit, ordered sub-states:
+     - **State 2 (Zoom Out)**: Camera smoothly pulls back (1.4s) to full living-room framing and settles completely before sofa action begins.
+     - **State 3A (First Lumi on Headrest)**: Sprout moves to the top of the sofa headrest with a clear, upright starting pose (`top: 53%`, `left: 71%`).
+     - **State 3B (First Lumi Jumps Down)**: Sprout visibly leaps forward and downward from headrest onto the left seat cushion (`top: 71.5%`, `left: 69%`), lands, and settles happily.
+     - **State 3C (Second Lumi on Headrest)**: Bellflower hops up to the headrest with a clear starting pose (`top: 53%`, `left: 76.8%`, upright, not stuck).
+     - **State 3D (Second Lumi Jumps & Becomes Trapped)**: Bellflower leaps forward and downward, slips into the seat cushion crevice (`top: 73.5%`, `left: 76.8%`), and only then becomes trapped (`isStuck={true}`) with kicking feet.
+     - **State 4 (Rescue)**: User-assisted rescue or autonomous rescue after 6s.
+     - **State 4B (Reunion)**: Both Lumori celebrate together with hearts and sparkles.
+     - **State 5 (Free Play)**: Automatic progression to joyful antics around the sofa cushions.
 
 ---
 
@@ -73,13 +80,14 @@ The coffee table activity faithfully implements the 6 storyboard stages via dete
 - **0. Dormant Orb**: Orb rests calmly on shelf; subtle lights and silhouettes inside Lumori. Zero Lumis outside.
 - **1. Emergence**: Lumori visibly step out of the orb onto the shelf, greet each other, and walk down to the living room.
 - **2A–2G. Broken Windmill Field (Zoomed In)**: Interactive diorama on coffee table with tool search, cooperative repair, and continuous blade rotation.
-- **2_ZOOM_OUT. Camera Zoom Out**: Smooth 1.4s camera pull-back to full living room framing.
-- **3. Sofa Adventure**: Sprout lands on the seat cushion; Bellflower follows and falls into the seat cushion crevice with kicking feet!
-- **4. Helping a Friend**: User can pinch/click Bellflower to help pull free, or Sprout helps autonomously after 6s.
-- **4B. Rescued Reunion**: Bellflower is free on the seat cushion; both Lumori celebrate together with hearts and sparkles before auto-advancing to Free Play.
+- **2_ZOOM_OUT. Camera Zoom Out**: Smooth 1.4s camera pull-back to full living room framing; windmill remains spinning continuously.
+- **3A. Sprout Reaches Headrest**: Sprout perches on top of sofa headrest.
+- **3B. Sprout Jumps Down**: Sprout visibly jumps onto left seat cushion and calls Bellflower.
+- **3C. Bellflower Reaches Headrest**: Bellflower hops onto headrest with clear starting pose.
+- **3D. Bellflower Jumps & Becomes Trapped**: Bellflower leaps down, slips into the seat cushion crevice, and only then becomes trapped with kicking feet!
+- **4. Helping a Friend**: User can pinch/click Bellflower to help pull free, or Sprout heaves him out autonomously.
+- **4B. Rescued Reunion**: Bellflower is freed onto seat cushion; both celebrate with happy chirps and sparkles before automatically advancing.
 - **5. Free Play**: Joyful autonomous antics around the sofa cushions and armrest.
-- **6. Return to Orb**: Triggered at any time by pinching at the orb or clicking the orb. Lumori sprint back to the shelf and climb inside.
-- **7. Lumori Idling**: Persistent living decoration inside the orb. Lumori rest and explore miniature Lumori. They do not auto-emerge again.
 - **6. Return to Orb**: Triggered at any time by pinching at the orb or clicking the orb. Lumori sprint back to the shelf and climb inside.
 - **7. Lumori Idling**: Persistent living decoration inside the orb. Lumori rest and explore miniature Lumori. They do not auto-emerge again.
 

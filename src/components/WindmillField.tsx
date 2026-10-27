@@ -6,6 +6,7 @@ import { soundEngine } from '../utils/audio';
 interface WindmillFieldProps {
   state: ExperienceState;
   isNearWindmill: boolean;
+  isPinching?: boolean;
   isWindmillRepaired: boolean;
   onUserInteract: () => void;
   className?: string;
@@ -14,6 +15,7 @@ interface WindmillFieldProps {
 export const WindmillField: React.FC<WindmillFieldProps> = ({
   state,
   isNearWindmill,
+  isPinching = false,
   isWindmillRepaired,
   onUserInteract,
   className = '',
@@ -134,24 +136,34 @@ export const WindmillField: React.FC<WindmillFieldProps> = ({
             <div className="w-0 h-0 border-l-[32px] border-l-transparent border-r-[32px] border-r-transparent border-b-[24px] border-b-[#A0522D] drop-shadow-md" />
             <div className="w-12 h-2 bg-[#8B4513] rounded-b shadow" />
 
-            {/* SHARED ROTOR ASSEMBLY & CONCENTRIC HUB - PERFECTLY CO-LOCATED PIVOT */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-0 h-0 flex items-center justify-center z-30">
-              {/* The Four Rotating Blades */}
-              <div
-                className={`w-48 h-48 flex items-center justify-center origin-center pointer-events-none ${
-                  isSpinning
-                    ? 'animate-spin'
-                    : isAccelerating
-                    ? 'animate-spin-slow'
-                    : 'rotate-12 transition-transform duration-500'
-                }`}
-                style={{
-                  animationDuration: isSpinning ? '1.8s' : '5s',
-                }}
+            {/* SINGLE PARENT GROUP ROTOR ASSEMBLY & CONCENTRIC HUB - PERFECTLY CO-LOCATED PIVOT */}
+            <div
+              className="absolute z-35 pointer-events-none"
+              style={{
+                width: 170,
+                height: 170,
+                left: '50%',
+                top: '100%',
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <svg
+                viewBox="-85 -85 170 170"
+                className="w-full h-full overflow-visible drop-shadow-md"
               >
-                <svg
-                  viewBox="-80 -80 160 160"
-                  className="w-full h-full overflow-visible drop-shadow-md"
+                <defs>
+                  <radialGradient id="hubGrad" cx="35%" cy="35%">
+                    <stop offset="0%" stopColor="#F59E0B" />
+                    <stop offset="70%" stopColor="#B45309" />
+                    <stop offset="100%" stopColor="#78350F" />
+                  </radialGradient>
+                </defs>
+
+                {/* Single parent group for all 4 blades rotating around (0, 0) */}
+                <g
+                  className={`windmill-blade-group ${
+                    isSpinning ? 'spinning' : isAccelerating ? 'accelerating' : 'stopped'
+                  }`}
                 >
                   {[0, 90, 180, 270].map((deg) => (
                     <g key={deg} transform={`rotate(${deg})`}>
@@ -162,30 +174,29 @@ export const WindmillField: React.FC<WindmillFieldProps> = ({
                         x2="0"
                         y2="-72"
                         stroke="#8B4513"
-                        strokeWidth="3"
+                        strokeWidth="3.2"
                         strokeLinecap="round"
                       />
                       {/* Canvas & Lattice Vane */}
                       <path
-                        d="M 2 -20 L 16 -24 L 16 -68 L 2 -68 Z"
+                        d="M 2 -18 L 16 -22 L 16 -68 L 2 -68 Z"
                         fill="#FFFBEB"
                         stroke="#B45309"
                         strokeWidth="1.2"
                         opacity="0.95"
                       />
                       {/* Lattice Cross Grid */}
-                      <line x1="2" y1="-32" x2="16" y2="-34" stroke="#B45309" strokeWidth="0.8" />
-                      <line x1="2" y1="-44" x2="16" y2="-46" stroke="#B45309" strokeWidth="0.8" />
-                      <line x1="2" y1="-56" x2="16" y2="-58" stroke="#B45309" strokeWidth="0.8" />
+                      <line x1="2" y1="-30" x2="16" y2="-32" stroke="#B45309" strokeWidth="0.8" />
+                      <line x1="2" y1="-42" x2="16" y2="-44" stroke="#B45309" strokeWidth="0.8" />
+                      <line x1="2" y1="-54" x2="16" y2="-56" stroke="#B45309" strokeWidth="0.8" />
                     </g>
                   ))}
-                </svg>
-              </div>
+                </g>
 
-              {/* Exact Concentric Center Axle Hub Cap */}
-              <div className="absolute w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 via-amber-700 to-amber-900 border-2 border-amber-300 shadow-md flex items-center justify-center pointer-events-none z-35">
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-100" />
-              </div>
+                {/* Exact Concentric Center Axle Hub Cap at (0, 0) */}
+                <circle cx="0" cy="0" r="12" fill="url(#hubGrad)" stroke="#FDE68A" strokeWidth="2.5" />
+                <circle cx="0" cy="0" r="4.5" fill="#FEF3C7" />
+              </svg>
             </div>
           </div>
 
@@ -226,17 +237,25 @@ export const WindmillField: React.FC<WindmillFieldProps> = ({
           <div className="w-28 h-4 rounded-b-lg bg-gradient-to-r from-stone-400 via-stone-300 to-stone-500 border-t border-stone-200 shadow-md" />
         </div>
 
-        {/* ---------------- INVITATION AR VISUAL CUES (Storyboard Panel 3) ---------------- */}
-        {isInviting && (
+        {/* ---------------- HOVER & PINCH AR VISUAL CUES (Storyboard Panel 3) ---------------- */}
+        {(isInviting || isNearWindmill) && (
           <div className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center">
-            {/* Rotating Arrow Ring around Hub */}
-            <div className="absolute top-[32%] left-[43.5%] w-24 h-24 rounded-full border-2 border-dashed border-amber-300 animate-spin-slow pointer-events-none" />
+            {/* Rotating Reticle Ring around Hub - Blue when hovering, Orange when pinching */}
+            <div
+              className={`absolute top-[32%] left-[43.5%] w-24 h-24 rounded-full border-2 border-dashed transition-all duration-200 pointer-events-none ${
+                isPinching
+                  ? 'border-amber-400 bg-amber-400/20 scale-105 shadow-[0_0_12px_#fbbf24]'
+                  : 'border-cyan-400/80 animate-spin-slow shadow-[0_0_10px_#38bdf8]'
+              }`}
+            />
 
             {/* Blowing & Waving Action Badge */}
-            <div className="absolute top-2 right-4 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-amber-400/80 shadow-2xl text-amber-200 text-xs flex items-center gap-2 animate-bounce">
-              <span className="text-base">💨</span>
-              <span className="font-semibold">Wave / Click to Blow Wind!</span>
-            </div>
+            {isInviting && (
+              <div className="absolute top-2 right-4 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-amber-400/80 shadow-2xl text-amber-200 text-xs flex items-center gap-2 animate-bounce">
+                <span className="text-base">💨</span>
+                <span className="font-semibold">Wave / Click to Blow Wind!</span>
+              </div>
+            )}
           </div>
         )}
 

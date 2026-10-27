@@ -309,6 +309,34 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         </div>
       </div>
 
+      {/* Jump to Sofa Sequence */}
+      <div className="mb-2">
+        <div className="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">
+          Jump to Sofa Sequence
+        </div>
+        <div className="grid grid-cols-4 gap-1">
+          {[
+            { label: '3A Sprout', state: ExperienceState.STATE_3A_SPROUT_HEADREST },
+            { label: '3B Jump', state: ExperienceState.STATE_3B_SPROUT_JUMP },
+            { label: '3C Bell', state: ExperienceState.STATE_3C_BELLFLOWER_HEADREST },
+            { label: '3D Trap', state: ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED },
+          ].map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => onSetState(item.state)}
+              className={`py-1 rounded text-[10px] font-mono transition-all cursor-pointer ${
+                state === item.state
+                  ? 'bg-teal-400 text-slate-950 font-bold'
+                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Jump to Core States */}
       <div>
         <div className="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">
