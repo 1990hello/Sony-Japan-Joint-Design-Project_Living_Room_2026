@@ -37,7 +37,7 @@ jobs:
         run: npm run build:gh-pages
         env:
           NODE_ENV: production
-          BASE_PATH: /Sony-Japan-Joint-Design-Living-Room-2026/
+          BASE_PATH: /Sony-Japan-Joint-Design-Project_Living_Room_2026/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
