@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ExperienceState, InteractionTarget, isWindmillState } from './types';
+import { ExperienceState, InteractionTarget, isWindmillState, SeasonalState, getNextSeasonalState, getPrevSeasonalState } from './types';
 import { LumoriStateMachine } from './stateMachine';
 import { useHandTracking } from './useHandTracking';
 import { LivingRoom } from './components/LivingRoom';
@@ -23,6 +23,8 @@ export default function App() {
   const [showStoryboard, setShowStoryboard] = useState<boolean>(false);
 
   const [isWindmillRepaired, setIsWindmillRepaired] = useState<boolean>(false);
+  const [seasonalState, setSeasonalState] = useState<SeasonalState>(SeasonalState.SPRING_SUNNY);
+  const [isSeasonalTransitioning, setIsSeasonalTransitioning] = useState<boolean>(false);
 
   const stateMachineRef = useRef<LumoriStateMachine | null>(null);
 
@@ -54,6 +56,40 @@ export default function App() {
       state === ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED
     ) {
       setMoriRescued(false);
+    }
+  }, [state]);
+
+  // Seasonal swipe handler with strict transition lockout
+  const handleSeasonalSwipe = useCallback(
+    (direction: 'next' | 'prev') => {
+      if (state !== ExperienceState.STATE_10_SEASONAL_WORLD) return;
+      if (isSeasonalTransitioning) return; // Strict lockout during transition; ignore additional swipes, do not queue!
+
+      setIsSeasonalTransitioning(true);
+      soundEngine.playSeasonalSwipeSound(direction);
+      setSeasonalState((prev) => (direction === 'next' ? getNextSeasonalState(prev) : getPrevSeasonalState(prev)));
+
+      // Lockout lasts 2.2s for complete environmental and audio transition
+      window.setTimeout(() => {
+        setIsSeasonalTransitioning(false);
+      }, 2200);
+    },
+    [state, isSeasonalTransitioning]
+  );
+
+  // Manage spatial sound and transition lockout during camera transitions into Seasonal World
+  useEffect(() => {
+    if (state === ExperienceState.STATE_9_ENTER_MINIATURE_WORLD) {
+      soundEngine.playOrbSpatialEnter();
+      setIsSeasonalTransitioning(true); // Disable gestures throughout camera transition
+    } else if (state === ExperienceState.STATE_10_SEASONAL_WORLD) {
+      // Enable exploration gestures only after camera has fully settled!
+      const timer = window.setTimeout(() => {
+        setIsSeasonalTransitioning(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    } else if (state < ExperienceState.STATE_8_REVEAL_ORB) {
+      soundEngine.stopSeasonalAmbience();
     }
   }, [state]);
 
@@ -120,6 +156,8 @@ export default function App() {
   } = useHandTracking({
     appState: state,
     onExecuteTargetAction: handleExecuteTargetAction,
+    onSeasonalSwipe: handleSeasonalSwipe,
+    isSeasonalTransitioning: isSeasonalTransitioning,
   });
 
   // Initialize state machine on mount
@@ -169,9 +207,12 @@ export default function App() {
   };
 
   const handleReset = () => {
+    soundEngine.stopSeasonalAmbience();
     setMoriRescued(false);
     setIsWindmillRepaired(false);
     setFreePlayPhase(0);
+    setSeasonalState(SeasonalState.SPRING_SUNNY);
+    setIsSeasonalTransitioning(false);
     stateMachineRef.current?.reset();
   };
 
@@ -205,6 +246,9 @@ export default function App() {
         onOrbClick={handleTriggerReturnToOrb}
         onWindmillInteract={handleWindmillUserInteract}
         onMoriRescue={handleRescueMori}
+        seasonalState={seasonalState}
+        isSeasonalTransitioning={isSeasonalTransitioning}
+        onSeasonalSwipe={handleSeasonalSwipe}
       />
 
       {/* AR HUD Overlay & Reticle */}
@@ -247,6 +291,10 @@ export default function App() {
           onToggleCamera={toggleCamera}
           onOpenStoryboard={() => setShowStoryboard(true)}
           onClose={() => setShowDebug(false)}
+          seasonalState={seasonalState}
+          isSeasonalTransitioning={isSeasonalTransitioning}
+          onSeasonalSwipe={handleSeasonalSwipe}
+          onSetSeasonalState={(s) => setSeasonalState(s)}
         />
       )}
 

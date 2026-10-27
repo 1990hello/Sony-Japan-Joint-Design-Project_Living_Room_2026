@@ -165,3 +165,40 @@ git push -u origin main
 | 10 | Bright Scandinavian room palette | **Verified** | Ivory walls, blonde oak floors, light oak shelf & table, oatmeal linen sofa |
 | 11 | State machine transitions | **Verified** | All states 0–7 and 2A–2G advance and transition deterministically |
 | 12 | Production build passes | **Verified** | `npm run build` and `npm run build:gh-pages` succeed with 0 errors |
+
+
+---
+
+## 🌿 Seasonal World Extension (Inside the Living-Room Orb)
+
+Following the Lumori return-home sequence, the experience extends seamlessly into the miniature world inside the orb:
+
+1. **Stage 1 — Lumori Settle (State 7)**: The Lumis complete their return-home animation and settle into their resting spots with a quiet pause.
+2. **Stage 2 — Reveal Orb (State 8)**: The camera smoothly frames the physical glowing glass orb on the shelf, allowing the user to observe it within the living room context.
+3. **Stage 3 — Spatial Enter (State 9)**: Spatial camera travel journeys through the curved glass into the miniature landscape with spatial audio resonance.
+4. **Stage 4 — Seasonal World Exploration (State 10)**: Exploration of the persistent miniature world across eight circular environment states:
+   - **1. Spring · Sunny**: Fresh growth, pink blossoms, bright sunlight rays, drifting petals.
+   - **2. Spring · Rainy**: Soft rainfall, glistening blossoms, gentle rain patter and stream ripples.
+   - **3. Summer · Sunny**: Dense lush foliage, golden sunbeams, active summer insects and fireflies.
+   - **4. Summer · Rainy**: Summer rain showers, stream turbulence, wet greenery.
+   - **5. Autumn · Sunny**: Golden and crimson foliage, crisp autumn breeze, swirling drifting leaves.
+   - **6. Autumn · Rainy**: Wet fallen leaves, cool rainfall, overcast atmosphere.
+   - **7. Winter · Sunny**: Bare frosted branches, hardy snow-capped pines, pale cold sunlight, crystal sparkles.
+   - **8. Winter · Rainy**: Cold sleet/wet precipitation, dark overcast sky, icy stream ripples.
+
+### Interaction & Gesture Controls
+- **Primary Gesture**: Open-palm horizontal swipe (webcam hand tracking):
+  - **Swipe Right**: Advance to next state.
+  - **Swipe Left**: Return to previous state.
+  - **Neutral Reset**: The hand must return to a neutral low-velocity state before another swipe can register, preventing accidental skipping.
+  - **Gesture Lockout**: During the 2.2s environmental transition, additional swipes are ignored (never queued).
+- **Desktop & Accessibility Fallbacks**:
+  - Horizontal mouse click-and-drag ($> 60$px displacement with horizontal dominance).
+  - Discreet left/right edge arrow buttons.
+  - Keyboard `ArrowLeft` and `ArrowRight` keys.
+  - All fallbacks follow the exact same transition lockout and neutral reset rules.
+- **Environmental Continuity**:
+  - Persistent stream flow direction, river rocks, stepping stones, and ancient tree shelter across all 8 states.
+  - Wet surfaces dry gradually over 3.5s when transitioning from rain to sun.
+  - All four Lumori remain visible in their permanent resting location under the tree alcove with subtle resting animations and weather responses.
+  - Exploration is indefinite; no forced return or time limits.

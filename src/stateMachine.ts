@@ -239,8 +239,36 @@ export class LumoriStateMachine {
         break;
 
       case ExperienceState.STATE_7_LUMORI_IDLING:
-        // Persistent living decoration state inside the orb.
-        // Never auto-emerges again!
+        // Stage 1: Lumori Settle - Lumis settle quietly into their resting position inside the orb
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_8_REVEAL_ORB);
+          }, 3400);
+        }
+        break;
+
+      case ExperienceState.STATE_8_REVEAL_ORB:
+        // Stage 2: Reveal the whole physical orb in the living room on the shelf
+        this.config.onPlayOrb();
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_9_ENTER_MINIATURE_WORLD);
+          }, 2800);
+        }
+        break;
+
+      case ExperienceState.STATE_9_ENTER_MINIATURE_WORLD:
+        // Stage 3: Spatial camera travel into the miniature world
+        if (this.config.autoTransitions) {
+          this.addTimer(() => {
+            this.transitionTo(ExperienceState.STATE_10_SEASONAL_WORLD);
+          }, 2600);
+        }
+        break;
+
+      case ExperienceState.STATE_10_SEASONAL_WORLD:
+        // Stage 4: Enable exploration in the persistent miniature seasonal world
+        // Exploration is enabled indefinitely; no automatic return to living room!
         break;
     }
   }
@@ -269,6 +297,9 @@ export class LumoriStateMachine {
       ExperienceState.STATE_5_FREE_PLAY,
       ExperienceState.STATE_6_RETURN_TO_ORB,
       ExperienceState.STATE_7_LUMORI_IDLING,
+      ExperienceState.STATE_8_REVEAL_ORB,
+      ExperienceState.STATE_9_ENTER_MINIATURE_WORLD,
+      ExperienceState.STATE_10_SEASONAL_WORLD,
     ];
     const currentIndex = sequence.indexOf(this.currentState);
     const nextIndex = (currentIndex + 1) % sequence.length;

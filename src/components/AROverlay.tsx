@@ -30,6 +30,9 @@ export const AROverlay: React.FC<AROverlayProps> = ({
   };
   const screenX = tracking.pinchX * 100;
   const screenY = tracking.pinchY * 100;
+  const isSeasonal =
+    state === ExperienceState.STATE_9_ENTER_MINIATURE_WORLD ||
+    state === ExperienceState.STATE_10_SEASONAL_WORLD;
 
   // Contextual instruction toast
   const getContextualInstruction = () => {
@@ -189,7 +192,7 @@ export const AROverlay: React.FC<AROverlayProps> = ({
       )}
 
       {/* Central Contextual Instruction */}
-      {instruction && (
+      {instruction && !isSeasonal && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300">
           <div className="px-4 py-2 rounded-full bg-slate-950/85 border border-white/20 backdrop-blur-md shadow-2xl text-xs md:text-sm text-amber-100/90 font-medium tracking-wide flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
@@ -199,7 +202,7 @@ export const AROverlay: React.FC<AROverlayProps> = ({
       )}
 
       {/* AR Hand Tracking / Mouse Pinch Reticle Indicator */}
-      <div
+      {!isSeasonal && <div
         className="absolute pointer-events-none transition-transform duration-75 z-40"
         style={{
           left: `${screenX}%`,
@@ -242,7 +245,7 @@ export const AROverlay: React.FC<AROverlayProps> = ({
             PINCH
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 };

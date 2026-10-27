@@ -4,11 +4,15 @@ import { HandTrackingState, InteractionTarget, ExperienceState, isWindmillState 
 interface UseHandTrackingProps {
   appState: ExperienceState;
   onExecuteTargetAction?: (target: InteractionTarget) => void;
+  onSeasonalSwipe?: (direction: "next" | "prev") => void;
+  isSeasonalTransitioning?: boolean;
 }
 
 export function useHandTracking({
   appState,
   onExecuteTargetAction,
+  onSeasonalSwipe,
+  isSeasonalTransitioning,
 }: UseHandTrackingProps) {
   const [trackingState, setTrackingState] = useState<HandTrackingState>({
     isActive: false,
@@ -37,6 +41,16 @@ export function useHandTracking({
 
   const onExecuteTargetActionRef = useRef(onExecuteTargetAction);
   onExecuteTargetActionRef.current = onExecuteTargetAction;
+
+  const onSeasonalSwipeRef = useRef(onSeasonalSwipe);
+  onSeasonalSwipeRef.current = onSeasonalSwipe;
+
+  const isSeasonalTransitioningRef = useRef(isSeasonalTransitioning);
+  isSeasonalTransitioningRef.current = isSeasonalTransitioning;
+
+  const motionHistoryRef = useRef<Array<{ x: number; y: number; time: number }>>([]);
+  const needsNeutralResetRef = useRef<boolean>(false);
+  const mouseDragStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   // Gesture state management
   const isPinchingRef = useRef<boolean>(false);
@@ -195,6 +209,10 @@ export function useHandTracking({
 
       const clientX = e.clientX;
       const clientY = e.clientY;
+
+      if (latestAppStateRef.current === ExperienceState.STATE_10_SEASONAL_WORLD) {
+        mouseDragStartRef.current = { x: clientX, y: clientY, time: Date.now() };
+      }
       const { target, isHit, isOrb, isWindmill } = identifyInteractionTarget(clientX, clientY);
 
       isMouseDownRef.current = true;
@@ -218,7 +236,22 @@ export function useHandTracking({
       }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      if (
+        latestAppStateRef.current === ExperienceState.STATE_10_SEASONAL_WORLD &&
+        mouseDragStartRef.current &&
+        !isSeasonalTransitioningRef.current
+      ) {
+        const dx = e.clientX - mouseDragStartRef.current.x;
+        const dy = e.clientY - mouseDragStartRef.current.y;
+        const dt = Date.now() - mouseDragStartRef.current.time;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > 1.6 * Math.abs(dy) && dt < 800) {
+          const direction: "next" | "prev" = dx > 0 ? "next" : "prev";
+          onSeasonalSwipeRef.current?.(direction);
+        }
+      }
+      mouseDragStartRef.current = null;
+
       isMouseDownRef.current = false;
       isPinchingRef.current = false;
       setTrackingState((prev) => ({
@@ -227,14 +260,26 @@ export function useHandTracking({
       }));
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (latestAppStateRef.current !== ExperienceState.STATE_10_SEASONAL_WORLD) return;
+      if (isSeasonalTransitioningRef.current) return;
+      if (e.key === "ArrowRight") {
+        onSeasonalSwipeRef.current?.("next");
+      } else if (e.key === "ArrowLeft") {
+        onSeasonalSwipeRef.current?.("prev");
+      }
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [identifyInteractionTarget, triggerActionForTarget, trackingState.isActive, trackingState.source]);
 
@@ -389,6 +434,54 @@ export function useHandTracking({
             }
 
             isPinchingRef.current = isPinchingNow;
+
+            // --- SEASONAL WORLD OPEN-PALM SWIPE RECOGNITION ---
+            if (latestAppStateRef.current === ExperienceState.STATE_10_SEASONAL_WORLD) {
+              const wrist = landmarks[0];
+              const middleTip = landmarks[12];
+              const ringTip = landmarks[16];
+              const pinkyTip = landmarks[20];
+              const palmCenterRawX = 1 - (wrist.x + landmarks[5].x + landmarks[9].x + landmarks[17].x) / 4;
+              const palmCenterRawY = (wrist.y + landmarks[5].y + landmarks[9].y + landmarks[17].y) / 4;
+
+              const distWrist = (pt: any) => Math.hypot(pt.x - wrist.x, pt.y - wrist.y);
+              const isOpenPalm =
+                distWrist(indexTip) > distWrist(landmarks[5]) * 1.15 &&
+                distWrist(middleTip) > distWrist(landmarks[9]) * 1.15 &&
+                distWrist(ringTip) > distWrist(landmarks[13]) * 1.15;
+
+              const now = Date.now();
+              motionHistoryRef.current.push({ x: palmCenterRawX, y: palmCenterRawY, time: now });
+              motionHistoryRef.current = motionHistoryRef.current.filter((item) => now - item.time < 350);
+
+              if (isSeasonalTransitioningRef.current) {
+                // Ignore additional swipes during transition; do NOT queue them!
+                motionHistoryRef.current = [];
+              } else if (needsNeutralResetRef.current) {
+                // Require hand to return to neutral state before another swipe can register
+                if (motionHistoryRef.current.length >= 4) {
+                  const first = motionHistoryRef.current[0];
+                  const last = motionHistoryRef.current[motionHistoryRef.current.length - 1];
+                  const speed = Math.abs(last.x - first.x) / ((last.time - first.time) || 1);
+                  if (speed < 0.00035) {
+                    needsNeutralResetRef.current = false;
+                  }
+                }
+              } else if (isOpenPalm && motionHistoryRef.current.length >= 4) {
+                const first = motionHistoryRef.current[0];
+                const last = motionHistoryRef.current[motionHistoryRef.current.length - 1];
+                const dt = last.time - first.time;
+                const dx = last.x - first.x;
+                const dy = last.y - first.y;
+
+                if (dt > 100 && dt < 420 && Math.abs(dx) > 0.16 && Math.abs(dx) > 1.8 * Math.abs(dy)) {
+                  const direction: "next" | "prev" = dx > 0 ? "next" : "prev";
+                  needsNeutralResetRef.current = true;
+                  motionHistoryRef.current = [];
+                  onSeasonalSwipeRef.current?.(direction);
+                }
+              }
+            }
 
             // Identify current target using fresh DOM coordinates
             const { target, isHit, isOrb, isWindmill } = identifyInteractionTarget(clientX, clientY);

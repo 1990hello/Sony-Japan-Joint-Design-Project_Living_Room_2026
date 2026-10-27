@@ -22,6 +22,10 @@ export enum ExperienceState {
   STATE_5_FREE_PLAY = 5,
   STATE_6_RETURN_TO_ORB = 6,
   STATE_7_LUMORI_IDLING = 7,
+  // Seasonal World Extension (Stages 2 - 4)
+  STATE_8_REVEAL_ORB = 8,
+  STATE_9_ENTER_MINIATURE_WORLD = 9,
+  STATE_10_SEASONAL_WORLD = 10,
 }
 
 export type LumiType = 'sprout' | 'bellflower' | 'sakura' | 'lotus';
@@ -150,9 +154,27 @@ export const STATE_METAS: Record<ExperienceState, StateMeta> = {
   },
   [ExperienceState.STATE_7_LUMORI_IDLING]: {
     id: ExperienceState.STATE_7_LUMORI_IDLING,
-    name: "7 — Lumori Idling",
-    shortDesc: "Persistent living decoration inside the orb.",
-    userHint: "The Lumis are living peacefully in miniature Lumori.",
+    name: "7 — Lumori Settle (Stage 1)",
+    shortDesc: "The Lumis settle quietly into their resting spots inside the orb.",
+    userHint: "The Lumis are resting in their cozy miniature world.",
+  },
+  [ExperienceState.STATE_8_REVEAL_ORB]: {
+    id: ExperienceState.STATE_8_REVEAL_ORB,
+    name: "8 — Reveal Orb (Stage 2)",
+    shortDesc: "The camera frames the complete physical orb glowing on the shelf.",
+    userHint: "Observing the magical orb on the shelf...",
+  },
+  [ExperienceState.STATE_9_ENTER_MINIATURE_WORLD]: {
+    id: ExperienceState.STATE_9_ENTER_MINIATURE_WORLD,
+    name: "9 — Enter Miniature World (Stage 3)",
+    shortDesc: "Spatial camera travel into the orb interior through the curved glass.",
+    userHint: "Travelling inside the orb...",
+  },
+  [ExperienceState.STATE_10_SEASONAL_WORLD]: {
+    id: ExperienceState.STATE_10_SEASONAL_WORLD,
+    name: "10 — Seasonal World Exploration (Stage 4)",
+    shortDesc: "Exploration of the persistent miniature seasonal world inside the orb.",
+    userHint: "Swipe left or right to change seasons and weather.",
   },
 };
 
@@ -245,5 +267,101 @@ export function isSofaSequenceState(state: ExperienceState): boolean {
     state === ExperienceState.STATE_3B_SPROUT_JUMP ||
     state === ExperienceState.STATE_3C_BELLFLOWER_HEADREST ||
     state === ExperienceState.STATE_3D_BELLFLOWER_JUMP_TRAPPED
+  );
+}
+
+
+export enum SeasonalState {
+  SPRING_SUNNY = 1,
+  SPRING_RAINY = 2,
+  SUMMER_SUNNY = 3,
+  SUMMER_RAINY = 4,
+  AUTUMN_SUNNY = 5,
+  AUTUMN_RAINY = 6,
+  WINTER_SUNNY = 7,
+  WINTER_RAINY = 8,
+}
+
+export interface SeasonalStateMeta {
+  id: SeasonalState;
+  season: "spring" | "summer" | "autumn" | "winter";
+  weather: "sunny" | "rainy";
+  name: string;
+  visualDesc: string;
+}
+
+export const SEASONAL_METAS: Record<SeasonalState, SeasonalStateMeta> = {
+  [SeasonalState.SPRING_SUNNY]: {
+    id: SeasonalState.SPRING_SUNNY,
+    season: "spring",
+    weather: "sunny",
+    name: "Spring · Sunny",
+    visualDesc: "Fresh growth, blossoms, bright natural light",
+  },
+  [SeasonalState.SPRING_RAINY]: {
+    id: SeasonalState.SPRING_RAINY,
+    season: "spring",
+    weather: "rainy",
+    name: "Spring · Rainy",
+    visualDesc: "Rainfall, wet petals, soft pattering rain",
+  },
+  [SeasonalState.SUMMER_SUNNY]: {
+    id: SeasonalState.SUMMER_SUNNY,
+    season: "summer",
+    weather: "sunny",
+    name: "Summer · Sunny",
+    visualDesc: "Lush foliage, warm sunlight, active insects",
+  },
+  [SeasonalState.SUMMER_RAINY]: {
+    id: SeasonalState.SUMMER_RAINY,
+    season: "summer",
+    weather: "rainy",
+    name: "Summer · Rainy",
+    visualDesc: "Rain showers, stream ripples, wet greenery",
+  },
+  [SeasonalState.AUTUMN_SUNNY]: {
+    id: SeasonalState.AUTUMN_SUNNY,
+    season: "autumn",
+    weather: "sunny",
+    name: "Autumn · Sunny",
+    visualDesc: "Golden foliage, changing leaves, drifting leaves",
+  },
+  [SeasonalState.AUTUMN_RAINY]: {
+    id: SeasonalState.AUTUMN_RAINY,
+    season: "autumn",
+    weather: "rainy",
+    name: "Autumn · Rainy",
+    visualDesc: "Wet fallen leaves, overcast light, rainfall",
+  },
+  [SeasonalState.WINTER_SUNNY]: {
+    id: SeasonalState.WINTER_SUNNY,
+    season: "winter",
+    weather: "sunny",
+    name: "Winter · Sunny",
+    visualDesc: "Snow and frost, pale sunlight, bare deciduous trees",
+  },
+  [SeasonalState.WINTER_RAINY]: {
+    id: SeasonalState.WINTER_RAINY,
+    season: "winter",
+    weather: "rainy",
+    name: "Winter · Rainy",
+    visualDesc: "Cold rain or sleet, wet snow, cold overcast atmosphere",
+  },
+};
+
+export function getNextSeasonalState(current: SeasonalState): SeasonalState {
+  return ((current % 8) + 1) as SeasonalState;
+}
+
+export function getPrevSeasonalState(current: SeasonalState): SeasonalState {
+  return (current === 1 ? 8 : current - 1) as SeasonalState;
+}
+
+
+export function isSeasonalWorldState(state: ExperienceState): boolean {
+  return (
+    state === ExperienceState.STATE_8_REVEAL_ORB ||
+    state === ExperienceState.STATE_9_ENTER_MINIATURE_WORLD ||
+    state === ExperienceState.STATE_10_SEASONAL_WORLD
   );
 }

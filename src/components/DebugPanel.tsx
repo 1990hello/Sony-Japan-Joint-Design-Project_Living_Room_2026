@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExperienceState, HandTrackingState, STATE_METAS, isWindmillZoomed } from '../types';
+import { ExperienceState, HandTrackingState, STATE_METAS, isWindmillZoomed, SeasonalState, SEASONAL_METAS } from '../types';
 import { X, Play, RotateCcw, SkipForward, Home, Pause, Camera, Wind, BookOpen, HandMetal, Target, Eye } from 'lucide-react';
 
 interface DebugPanelProps {
@@ -18,6 +18,10 @@ interface DebugPanelProps {
   onToggleCamera: () => void;
   onOpenStoryboard: () => void;
   onClose: () => void;
+  seasonalState?: SeasonalState;
+  isSeasonalTransitioning?: boolean;
+  onSeasonalSwipe?: (direction: 'next' | 'prev') => void;
+  onSetSeasonalState?: (season: SeasonalState) => void;
 }
 
 export const DebugPanel: React.FC<DebugPanelProps> = ({
@@ -36,6 +40,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   onToggleCamera,
   onOpenStoryboard,
   onClose,
+  seasonalState = SeasonalState.SPRING_SUNNY,
+  isSeasonalTransitioning = false,
+  onSeasonalSwipe,
+  onSetSeasonalState,
 }) => {
   const currentMeta = STATE_METAS[state] || {
     id: state,
@@ -366,6 +374,113 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
               {item.label}
             </button>
           ))}
+        </div>
+      </div>
+      {/* Jump to Seasonal World States */}
+      <div className="mb-2">
+        <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">
+          <span>Seasonal World (Stage 1-4)</span>
+          {state === ExperienceState.STATE_10_SEASONAL_WORLD && (
+            <span className={isSeasonalTransitioning ? "text-amber-400 animate-pulse" : "text-emerald-400"}>
+              {isSeasonalTransitioning ? "LOCKOUT (Transitioning)" : "READY (Neutral)"}
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-1 mb-1.5">
+          <button
+            type="button"
+            onClick={() => onSetState(ExperienceState.STATE_8_REVEAL_ORB)}
+            className={`py-1 px-1.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+              state === ExperienceState.STATE_8_REVEAL_ORB
+                ? 'bg-amber-400 text-slate-950 font-bold'
+                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            Stage 2: Reveal Orb
+          </button>
+          <button
+            type="button"
+            onClick={() => onSetState(ExperienceState.STATE_9_ENTER_MINIATURE_WORLD)}
+            className={`py-1 px-1.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+              state === ExperienceState.STATE_9_ENTER_MINIATURE_WORLD
+                ? 'bg-amber-400 text-slate-950 font-bold'
+                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            Stage 3: Enter Orb
+          </button>
+          <button
+            type="button"
+            onClick={() => onSetState(ExperienceState.STATE_10_SEASONAL_WORLD)}
+            className={`py-1 px-1.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+              state === ExperienceState.STATE_10_SEASONAL_WORLD
+                ? 'bg-cyan-400 text-slate-950 font-bold'
+                : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            Stage 4: Explore
+          </button>
+        </div>
+
+        {/* 8 Persistent Environment States */}
+        <div className="text-[10px] text-slate-400 font-mono uppercase tracking-wider mb-1">
+          8 Persistent Seasonal Environments
+        </div>
+        <div className="grid grid-cols-4 gap-1 mb-2">
+          {[
+            { id: SeasonalState.SPRING_SUNNY, label: "1. Spr Sun" },
+            { id: SeasonalState.SPRING_RAINY, label: "2. Spr Rain" },
+            { id: SeasonalState.SUMMER_SUNNY, label: "3. Sum Sun" },
+            { id: SeasonalState.SUMMER_RAINY, label: "4. Sum Rain" },
+            { id: SeasonalState.AUTUMN_SUNNY, label: "5. Aut Sun" },
+            { id: SeasonalState.AUTUMN_RAINY, label: "6. Aut Rain" },
+            { id: SeasonalState.WINTER_SUNNY, label: "7. Win Sun" },
+            { id: SeasonalState.WINTER_RAINY, label: "8. Win Rain" },
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                onSetState(ExperienceState.STATE_10_SEASONAL_WORLD);
+                onSetSeasonalState?.(item.id);
+              }}
+              className={`py-1 px-0.5 rounded text-[10px] font-mono transition-all cursor-pointer text-center ${
+                seasonalState === item.id && state === ExperienceState.STATE_10_SEASONAL_WORLD
+                  ? 'bg-emerald-400 text-slate-950 font-bold shadow-md'
+                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Swipe Simulator */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <button
+            type="button"
+            disabled={isSeasonalTransitioning}
+            onClick={() => onSeasonalSwipe?.('prev')}
+            className={`py-1.5 px-2 rounded-lg text-xs font-mono font-medium border flex items-center justify-center gap-1 ${
+              isSeasonalTransitioning
+                ? 'bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed'
+                : 'bg-indigo-600/30 hover:bg-indigo-600/50 border-indigo-500/50 text-indigo-200 cursor-pointer'
+            }`}
+          >
+            <span>‹ Swipe Left (Prev)</span>
+          </button>
+          <button
+            type="button"
+            disabled={isSeasonalTransitioning}
+            onClick={() => onSeasonalSwipe?.('next')}
+            className={`py-1.5 px-2 rounded-lg text-xs font-mono font-medium border flex items-center justify-center gap-1 ${
+              isSeasonalTransitioning
+                ? 'bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed'
+                : 'bg-indigo-600/30 hover:bg-indigo-600/50 border-indigo-500/50 text-indigo-200 cursor-pointer'
+            }`}
+          >
+            <span>Swipe Right (Next) ›</span>
+          </button>
         </div>
       </div>
     </div>

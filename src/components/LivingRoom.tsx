@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ExperienceState, isWindmillState, isWindmillZoomed } from '../types';
+import { ExperienceState, isWindmillState, isWindmillZoomed, SeasonalState } from '../types';
+import { SeasonalWorld } from './SeasonalWorld';
 import { Orb } from './Orb';
 import { Lumi } from './Lumi';
 import { WindmillField } from './WindmillField';
@@ -16,6 +17,9 @@ interface LivingRoomProps {
   onOrbClick: () => void;
   onWindmillInteract: () => void;
   onMoriRescue: () => void;
+  seasonalState: SeasonalState;
+  isSeasonalTransitioning: boolean;
+  onSeasonalSwipe: (direction: 'next' | 'prev') => void;
 }
 
 export const LivingRoom: React.FC<LivingRoomProps> = ({
@@ -29,12 +33,18 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
   onOrbClick,
   onWindmillInteract,
   onMoriRescue,
+  seasonalState,
+  isSeasonalTransitioning,
+  onSeasonalSwipe,
 }) => {
   // Emergence phase tracker for State 1 (0: emerging on shelf, 1: travelling down to table)
   const [emergencePhase, setEmergencePhase] = useState<number>(0);
 
   // Camera zoom check: Zooms smoothly into coffee table during States 2A-2G, smoothly zooms out in 2_ZOOM_OUT
   const isZoomed = isWindmillZoomed(state);
+  const isRevealOrb = state === ExperienceState.STATE_8_REVEAL_ORB;
+  const isEnteringWorld = state === ExperienceState.STATE_9_ENTER_MINIATURE_WORLD;
+  const isInsideSeasonalWorld = state === ExperienceState.STATE_10_SEASONAL_WORLD;
 
   useEffect(() => {
     if (state === ExperienceState.STATE_1_EMERGENCE) {
@@ -55,6 +65,9 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
     if (
       state === ExperienceState.STATE_0_DORMANT_ORB ||
       state === ExperienceState.STATE_7_LUMORI_IDLING ||
+      state === ExperienceState.STATE_8_REVEAL_ORB ||
+      state === ExperienceState.STATE_9_ENTER_MINIATURE_WORLD ||
+      state === ExperienceState.STATE_10_SEASONAL_WORLD ||
       isWindmillState(state)
     ) {
       return null;
@@ -470,12 +483,20 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
         <div className="absolute bottom-6 left-[18%] w-[72%] h-[34%] rounded-[48px] bg-gradient-to-tr from-[#FAF6EE] via-[#FDFBF6] to-[#F5EFE4] border border-[#E8DEC9] backdrop-blur-[1px] shadow-lg" />
       </div>
 
-      {/* ---------------- CAMERA ZOOM STAGE (Smooth zoom into coffee table in States 2A-2G, pulls back in 2_ZOOM_OUT) ---------------- */}
+      {/* ---------------- CAMERA ZOOM STAGE (Smooth zoom into table in 2A-2G, reveal orb in 8, spatial enter in 9) ---------------- */}
       <div
-        className="absolute inset-0 transition-transform duration-[1400ms] ease-in-out will-change-transform pointer-events-auto"
+        className="absolute inset-0 transition-all duration-[1600ms] ease-in-out will-change-transform pointer-events-auto"
         style={{
-          transform: isZoomed ? 'scale(2.05)' : 'scale(1)',
-          transformOrigin: '38% 74%',
+          transform: isZoomed
+            ? 'scale(2.05)'
+            : isRevealOrb
+            ? 'scale(1.75)'
+            : isEnteringWorld
+            ? 'scale(4.5)'
+            : 'scale(1)',
+          transformOrigin: isRevealOrb || isEnteringWorld ? '18% 28%' : '38% 74%',
+          opacity: isInsideSeasonalWorld ? 0 : 1,
+          pointerEvents: isInsideSeasonalWorld ? 'none' : 'auto',
         }}
       >
         {/* ---------------- FURNITURE 1: LIGHT OAK FLOATING SHELF WITH ORB ---------------- */}
@@ -591,6 +612,19 @@ export const LivingRoom: React.FC<LivingRoomProps> = ({
         {/* Roaming Lumis in room states (Never renders during State 0 or 7!) */}
         {renderRoamingLumis()}
       </div>
+
+      {/* ---------------- STAGE 3 & 4: SEASONAL WORLD INSIDE THE ORB ---------------- */}
+      {(isEnteringWorld || isInsideSeasonalWorld) && (
+        <div
+          className={"absolute inset-0 z-30 transition-opacity ease-in-out " + (isInsideSeasonalWorld ? "duration-[800ms] opacity-100 pointer-events-auto" : "duration-[1800ms] opacity-60 pointer-events-none")}
+        >
+          <SeasonalWorld
+            seasonalState={seasonalState}
+            isTransitioning={isSeasonalTransitioning}
+            onSwipe={onSeasonalSwipe}
+          />
+        </div>
+      )}
     </div>
   );
 };
