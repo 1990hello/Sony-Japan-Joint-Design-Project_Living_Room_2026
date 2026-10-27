@@ -70,9 +70,9 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   ];
 
   return (
-    <div className="no-gesture-trigger absolute right-4 top-16 z-50 w-96 rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl p-4 text-slate-200 font-sans backdrop-blur-xl animate-fade-in select-none">
-      {/* Panel Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+    <div className="no-gesture-trigger absolute right-4 top-16 z-50 w-96 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-5rem)] flex flex-col rounded-2xl bg-slate-950/95 border border-slate-700/80 shadow-2xl text-slate-200 font-sans backdrop-blur-xl animate-fade-in select-none overflow-hidden">
+      {/* Panel Header (Pinned) */}
+      <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-800 px-4 py-3 bg-slate-950/90 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-cyan-400" />
           <h2 className="text-xs font-mono font-bold tracking-wider text-slate-100 uppercase">
@@ -87,6 +87,9 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           <X className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Scrollable Content Body */}
+      <div className="overflow-y-auto flex-1 p-4 pt-3 custom-scrollbar">
 
       {/* State Machine Status */}
       <div className="space-y-1.5 mb-3 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 text-xs">
@@ -482,6 +485,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             <span>Swipe Right (Next) ›</span>
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
