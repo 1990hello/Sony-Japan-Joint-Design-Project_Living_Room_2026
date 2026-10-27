@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(() => {
   const isProd = process.env.NODE_ENV === 'production';
-  const base = process.env.BASE_PATH || (isProd ? '/Sony-Japan-Joint-Design-Living-Room-2026/' : '/');
+  const base = process.env.BASE_PATH || (isProd ? '/Sony-Japan-Joint-Design-Project_Living_Room_2026/' : '/');
   return {
     base,
     plugins: [react(), tailwindcss()],
